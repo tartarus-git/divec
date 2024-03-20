@@ -6,6 +6,8 @@
 #include <cstdint>
 #include <iostream>
 
+#include <cstdlib>
+
 bool superpositions_equal(const std::vector<size_t> &a, const std::vector<size_t> &b) noexcept {
 
 	// sets have to have the same size
@@ -55,11 +57,21 @@ bool is_ghost_row(const nfa_table_t &nfa_table, size_t row) noexcept {
 std::vector<size_t> follow_ghost_rows(const nfa_table_t &nfa_table, const std::vector<size_t> &state_superposition) noexcept {
 	std::vector<size_t> result;
 
+	bool hit = false;
+
 	for (size_t i = 0; i < state_superposition.size(); i++) {
 		const size_t state = state_superposition[i];
 		const nfa_row_t &nfa_row = nfa_table.rows[state];
 
 		if (is_ghost_row(nfa_table, state)) {
+
+			if (nfa_row.children.empty()) {
+				result.push_back(state);
+				continue;
+			}
+
+			hit = true;
+
 			for (const auto &child : nfa_row.children) {
 				result.push_back(child);
 			}
@@ -67,6 +79,10 @@ std::vector<size_t> follow_ghost_rows(const nfa_table_t &nfa_table, const std::v
 		}
 
 		result.push_back(state);
+	}
+
+	if (hit == true) {
+		return follow_ghost_rows(nfa_table, result);
 	}
 
 	return result;
@@ -87,20 +103,57 @@ void overwrite_dfa_row_next(dfa_table_t &dfa_table,
 
 }
 
-// NOTE: Assumes that follow_ghost_rows has already been called.
-void shape_edges(dfa_table_t &dfa_table,
+size_t shape_edges(dfa_table_t &dfa_table,
 		     const nfa_table_t &nfa_table,
-		     const std::vector<size_t> state_superposition,
-		     size_t current_dfa_row) noexcept {
+		     std::vector<size_t> state_superposition,
+		     size_t current_dfa_row,
+		     std::vector<std::vector<size_t>> &global_superposition_catalogue,
+		     std::vector<size_t> &global_corresponding_nexts) noexcept {
 
-	// TODO: segmentation fault somewhere in here, find it and destroy it.
+	// TODO: This is SEMI-redundant because there exists another copy of it below somewhere.
+	// Don't remove this without thinking about it though, because there are edge-cases.
+	state_superposition = follow_ghost_rows(nfa_table, state_superposition);
+
+	if (state_superposition.size() > 1) {
+		std::cout << "greater than 1 found on:\n";
+		for (const auto &state : state_superposition) {
+			std::cout << state << ", ";
+		}
+		std::cout << '\n';
+	}
+
+	size_t terminator_id = -1;
+
+	// NOTE: ssize_t is needed because or else i-- can cause a bug to happen
+	// where some things are ignored in the state_superposition vector.
+	for (ssize_t i = 0; i < state_superposition.size(); i++) {
+		const size_t &state = state_superposition[i];
+		if (is_ghost_row(nfa_table, state)) {
+			if (nfa_table.rows[state].children.empty()) {
+				terminator_id = nfa_table.rows[state].token_id;
+				state_superposition.erase(state_superposition.begin() + i);
+				i--;
+				continue;
+			}
+		}
+	}
+
+	// TODO: Remove this, completely useless. Remove the above terminator_id stuff as well. Since we now
+	// do that stuff ahead of time at the bottom of the function, before the next recursion starts,
+	// we don't need the code for doing it inside of the recursions.
+	// TODO: Make sure to handle the first call of the function, because that edge-case needs to be handled extra if we are to remove
+	// the code that I just mentioned.
+	if (state_superposition.empty()) {
+		dfa_table.rows.erase(dfa_table.rows.begin() + current_dfa_row);
+		return terminator_id;
+	}
 
 	std::vector<std::vector<size_t>> new_state_superpositions;
 	std::vector<size_t> corresponding_nexts;
 
-	for (uint16_t character = 0; character < 256; character++) {
+	std::cout << '\n';
 
-	next_character:
+	for (uint16_t character = 0; character < 256; character++) {
 
 		std::vector<size_t> new_state_superposition;
 
@@ -111,9 +164,12 @@ void shape_edges(dfa_table_t &dfa_table,
 			}
 		}
 
+		std::cout << new_state_superposition.size();
+
 		if (new_state_superposition.empty()) {
 			// if there is nowhere to go, mark a missing edge with 0
 			overwrite_dfa_row_next(dfa_table, current_dfa_row, character, 0);
+			continue;
 		}
 
 		for (size_t i = 0; i < new_state_superpositions.size(); i++) {
@@ -126,15 +182,73 @@ void shape_edges(dfa_table_t &dfa_table,
 			}
 		}
 
-		size_t new_dfa_row = allocate_dfa_row(dfa_table);
+		for (size_t i = 0; i < global_superposition_catalogue.size(); i++) {
+			const auto &global_superposition = global_superposition_catalogue[i];
+
+			if (superpositions_equal(new_state_superposition, global_superposition)) {
+				overwrite_dfa_row_next(dfa_table, current_dfa_row, character, global_corresponding_nexts[i]);
+				goto next_character;
+			}
+		}
+
+		{
 
 		new_state_superpositions.push_back(new_state_superposition);
-		corresponding_nexts.push_back(new_dfa_row);
 
-		overwrite_dfa_row_next(dfa_table, current_dfa_row, character, new_dfa_row);
+	new_state_superposition = follow_ghost_rows(nfa_table, new_state_superposition);
 
-		shape_edges(dfa_table, nfa_table, new_state_superposition, new_dfa_row);
+	size_t recursion_terminator_id = -1;
+
+	// NOTE: ssize_t is needed because or else i-- can cause a bug to happen
+	// where some things are ignored in the state_superposition vector.
+	for (ssize_t i = 0; i < new_state_superposition.size(); i++) {
+		const size_t &state = new_state_superposition[i];
+		if (is_ghost_row(nfa_table, state)) {
+			if (nfa_table.rows[state].children.empty()) {
+				recursion_terminator_id = nfa_table.rows[state].token_id;
+				new_state_superposition.erase(new_state_superposition.begin() + i);
+				i--;
+				continue;
+			}
+		}
 	}
+
+	std::cout << "rec term id: " << recursion_terminator_id << '\n';
+
+
+			size_t new_dfa_row = -1;
+
+			if (recursion_terminator_id != -1) {
+				overwrite_dfa_row_next(dfa_table, current_dfa_row, character, -recursion_terminator_id);
+				corresponding_nexts.push_back(-recursion_terminator_id);
+			} else {
+				new_dfa_row = allocate_dfa_row(dfa_table);
+				overwrite_dfa_row_next(dfa_table, current_dfa_row, character, new_dfa_row);
+				corresponding_nexts.push_back(new_dfa_row);
+			}
+
+			for (const auto &superposition : new_state_superpositions) {
+				global_superposition_catalogue.push_back(superposition);
+			}
+
+			for (const size_t &next : corresponding_nexts) {
+				global_corresponding_nexts.push_back(next);
+			}
+
+			if (recursion_terminator_id != -1) {
+			} else {
+				shape_edges(dfa_table, nfa_table, new_state_superposition, new_dfa_row,
+					global_superposition_catalogue, global_corresponding_nexts);
+			}
+
+		}
+
+	next_character:
+	}
+
+	std::cout << '\n';
+
+	return terminator_id;
 }
 
 dfa_table_t gen_dfa(const nfa_table_t &nfa_table) noexcept {
@@ -146,15 +260,23 @@ dfa_table_t gen_dfa(const nfa_table_t &nfa_table) noexcept {
 
 	size_t origin_row = allocate_dfa_row(result);
 
-	state_superposition = follow_ghost_rows(nfa_table, state_superposition);
-
-	std::cout << "initial ghost rows followed:\n";
+	std::cout << "initial ghost rows followed (list of them):\n";
 	for (const size_t &state : state_superposition) {
 		std::cout << state;
 	}
 	std::cout << '\n';
 
-	shape_edges(result, nfa_table, state_superposition, origin_row);
+	std::vector<std::vector<size_t>> global_cat;
+	std::vector<size_t> global_nexts;
+
+	size_t recursion_terminator_id = shape_edges(result, nfa_table, state_superposition, origin_row, global_cat, global_nexts);
+
+	std::cout << recursion_terminator_id << '\n';
+
+	if (recursion_terminator_id != -1) {
+		std::cerr << "ONE OF THE REGEXES IS EMPTY (I THINK), NOT ALLOWED!\n";
+		std::exit(EXIT_FAILURE);
+	}
 
 	return result;
 }

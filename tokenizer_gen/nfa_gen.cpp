@@ -92,6 +92,11 @@ void add_nfa_rows_for_regex(nfa_table_t &nfa_table, size_t token_id, const std::
 	size_t last_row = allocate_nfa_row(nfa_table, { false, { } });
 	patch_from_ghost_row(nfa_table, 0, last_row);
 
+	size_t just_popped_source = -1;
+	size_t just_popped_destination = -1;
+
+	std::cout << last_row << '\n';
+
 	std::vector<regex_token_t> regex_tokens = tokenize_regex(regex);
 
 	for (const regex_token_t &regex_token : regex_tokens) {
@@ -112,6 +117,7 @@ void add_nfa_rows_for_regex(nfa_table_t &nfa_table, size_t token_id, const std::
 				convert_to_ghost_row(nfa_table, last_row);
 				patch_from_ghost_row(nfa_table, last_row, *(ghost_row_destination_stack.end() - 1));
 				last_row = allocate_nfa_row(nfa_table, { false, { } });
+				std::cout << last_row << '\n';
 				patch_from_ghost_row(nfa_table, *(ghost_row_source_stack.end() - 1), last_row);
 				break;
 
@@ -121,24 +127,35 @@ void add_nfa_rows_for_regex(nfa_table_t &nfa_table, size_t token_id, const std::
 				ghost_row_source_stack.push_back(last_row);
 				ghost_row_destination_stack.push_back(allocate_ghost_row(nfa_table));
 				last_row = allocate_nfa_row(nfa_table, { false, { } });
+				patch_from_ghost_row(nfa_table, ghost_row_source_stack.back(), last_row);
+				break;
 
 			case regex_token_type_t::SUBEXPRESSION_END:
 				std::cout << "SUBEXPRESSION_END\n";
 				{
+				just_popped_source = ghost_row_source_stack.back();
 				ghost_row_source_stack.pop_back();
 				size_t temp_ghost_row = ghost_row_destination_stack.back();
+				just_popped_destination = temp_ghost_row;
 				ghost_row_destination_stack.pop_back();
+
+				convert_to_ghost_row(nfa_table, last_row);
+				patch_from_ghost_row(nfa_table, last_row, temp_ghost_row);
+
 				last_row = allocate_nfa_row(nfa_table, { false, { } });
 				patch_from_ghost_row(nfa_table, temp_ghost_row, last_row);
 				break;
 				}
 
+				// TODO: Kleene star only works directly after parenthesis
+				// right now. Fix that in future version of project.
 			case regex_token_type_t::KLEENE_STAR:
 				std::cout << "KLEENE_STAR\n";
 				{
-				size_t newest_end_ghost_row = *(ghost_row_destination_stack.end() - 1);
-				size_t newest_start_ghost_row = *(ghost_row_source_stack.end() - 1);
+				size_t newest_end_ghost_row = just_popped_destination;
+				size_t newest_start_ghost_row = just_popped_source;
 				patch_from_ghost_row(nfa_table, newest_end_ghost_row, newest_start_ghost_row);
+				patch_from_ghost_row(nfa_table, newest_start_ghost_row, last_row);
 				break;
 				}
 

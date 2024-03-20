@@ -28,8 +28,9 @@ int main() {
 		std::cout << " ; " << row.token_id;
 		std::cout << " ; ";
 		for (const auto &child : row.children) {
-			std::cout << child;
+			std::cout << child << ", ";
 		}
+		std::cout << " ; " << row.ghost_row;
 		std::cout << '\n';
 	}
 
@@ -37,4 +38,18 @@ int main() {
 
 	dfa_table_t dfa = gen_dfa(nfa);
 
+	std::cout << "\n\n\n";
+
+	for (const auto &row : dfa.rows) {
+		for (const auto &element : row.elements) {
+
+			if ((ssize_t)element.next < 0) {
+				std::cout << (char)('A' + -element.next);
+				continue;
+			}
+
+			std::cout << element.next;
+		}
+		std::cout << '\n';
+	}
 }
