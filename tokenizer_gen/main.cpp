@@ -31,4 +31,8 @@ int main() {
 		}
 		std::cout << '\n';
 	}
+
+	dfa_table_t dfa = gen_dfa(nfa);
+
+	std::cout << "\nNEXT IS DFA OUTPUT:\n\n";
 }
