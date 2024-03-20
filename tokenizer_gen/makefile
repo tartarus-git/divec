@@ -8,8 +8,12 @@ all: build
 
 build: bin/tokenizer_generator
 
-bin/tokenizer_generator: bin/main.o bin/nfa_gen.o
-	$(CPP_COMP_PREAMBLE) -o bin/tokenizer_generator bin/main.o bin/nfa_gen.o
+OBJECTS_TO_LINK := bin/main.o \
+bin/nfa_gen.o \
+bin/dfa_gen.o
+
+bin/tokenizer_generator: $(OBJECTS_TO_LINK)
+	$(CPP_COMP_PREAMBLE) -o bin/tokenizer_generator $(OBJECTS_TO_LINK)
 
 $(shell $(CPP_COMPILER) -MM main.cpp | aprepend --front bin/ > .make_temp_file)
 include .make_temp_file
@@ -20,6 +24,11 @@ $(shell $(CPP_COMPILER) -MM nfa_gen.cpp | aprepend --front bin/ > .make_temp_fil
 include .make_temp_file
 bin/nfa_gen.o: bin/.dirstamp
 	$(CPP_COMP_PREAMBLE) -o bin/nfa_gen.o -c nfa_gen.cpp
+
+$(shell $(CPP_COMPILER) -MM dfa_gen.cpp | aprepend --front bin/ > .make_temp_file)
+include .make_temp_file
+bin/dfa_gen.o: bin/.dirstamp
+	$(CPP_COMP_PREAMBLE) -o bin/dfa_gen.o -c dfa_gen.cpp
 
 bin/.dirstamp:
 	mkdir -p bin

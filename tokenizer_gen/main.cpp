@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "nfa_gen.h"
+#include "dfa_gen.h"
 
 #define SPECIFICATION_PATH "tokenizer.tokenizer_spec"
 
@@ -32,7 +33,8 @@ int main() {
 		std::cout << '\n';
 	}
 
+	std::cout << "\nNEXT IS DFA OUTPUT:\n\n";
+
 	dfa_table_t dfa = gen_dfa(nfa);
 
-	std::cout << "\nNEXT IS DFA OUTPUT:\n\n";
 }

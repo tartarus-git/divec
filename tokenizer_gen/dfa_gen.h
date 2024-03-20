@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include "nfa_gen.h"
+
 struct dfa_element_t {
 	// NOTE: negatives mean indices of the matches that are now matched.
 	size_t next;
