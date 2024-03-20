@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <string>
 #include <vector>
+#include <iostream>
 
 std::vector<regex_token_t> tokenize_regex(const std::string &regex) noexcept {
 	std::vector<regex_token_t> result;
@@ -11,15 +12,22 @@ std::vector<regex_token_t> tokenize_regex(const std::string &regex) noexcept {
 		switch (character) {
 		case '(':
 			result.push_back({ regex_token_type_t::SUBEXPRESSION_BEGIN });
+			break;
 		case ')':
 			result.push_back({ regex_token_type_t::SUBEXPRESSION_END });
+			break;
 		case '|':
 			result.push_back({ regex_token_type_t::ALTERNATION });
+			break;
 		case '*':
 			result.push_back({ regex_token_type_t::KLEENE_STAR });
+			break;
 		// TODO: implement tokenization of [] expressions as filters.
 		default:
-			result.push_back({ regex_token_type_t::FILTER });
+			regex_token_t new_token = { regex_token_type_t::FILTER };
+			new_token.row_filter[(uint8_t)character] = true;
+			result.push_back(new_token);
+			break;
 		}
 	}
 	return result;
@@ -73,9 +81,6 @@ void shape_row(nfa_table_t &nfa_table, size_t row, const bool (&row_filter)[256]
 }
 
 void add_nfa_rows_for_regex(nfa_table_t &nfa_table, size_t token_id, const std::string &regex) noexcept {
-	size_t last_row = allocate_nfa_row(nfa_table, { false, { } });
-	patch_from_ghost_row(nfa_table, 0, last_row);
-
 	std::vector<size_t> ghost_row_source_stack;
 	ghost_row_source_stack.push_back(0);
 
@@ -84,6 +89,9 @@ void add_nfa_rows_for_regex(nfa_table_t &nfa_table, size_t token_id, const std::
 	nfa_table.rows[ending_ghost_row].token_id = token_id;
 	ghost_row_destination_stack.push_back(ending_ghost_row);
 
+	size_t last_row = allocate_nfa_row(nfa_table, { false, { } });
+	patch_from_ghost_row(nfa_table, 0, last_row);
+
 	std::vector<regex_token_t> regex_tokens = tokenize_regex(regex);
 
 	for (const regex_token_t &regex_token : regex_tokens) {
@@ -91,6 +99,7 @@ void add_nfa_rows_for_regex(nfa_table_t &nfa_table, size_t token_id, const std::
 		switch (regex_token.type) {
 
 			case regex_token_type_t::FILTER:
+				std::cout << "FILTER\n";
 				{
 				size_t new_last_row = allocate_nfa_row(nfa_table, { false, { } });
 				shape_row(nfa_table, last_row, regex_token.row_filter, new_last_row);
@@ -99,6 +108,7 @@ void add_nfa_rows_for_regex(nfa_table_t &nfa_table, size_t token_id, const std::
 				}
 
 			case regex_token_type_t::ALTERNATION:
+				std::cout << "ALTERNATION\n";
 				convert_to_ghost_row(nfa_table, last_row);
 				patch_from_ghost_row(nfa_table, last_row, *(ghost_row_destination_stack.end() - 1));
 				last_row = allocate_nfa_row(nfa_table, { false, { } });
@@ -106,12 +116,14 @@ void add_nfa_rows_for_regex(nfa_table_t &nfa_table, size_t token_id, const std::
 				break;
 
 			case regex_token_type_t::SUBEXPRESSION_BEGIN:
+				std::cout << "SUBEXPRESSION_BEGIN\n";
 				convert_to_ghost_row(nfa_table, last_row);
 				ghost_row_source_stack.push_back(last_row);
 				ghost_row_destination_stack.push_back(allocate_ghost_row(nfa_table));
 				last_row = allocate_nfa_row(nfa_table, { false, { } });
 
 			case regex_token_type_t::SUBEXPRESSION_END:
+				std::cout << "SUBEXPRESSION_END\n";
 				{
 				ghost_row_source_stack.pop_back();
 				size_t temp_ghost_row = ghost_row_destination_stack.back();
@@ -122,6 +134,7 @@ void add_nfa_rows_for_regex(nfa_table_t &nfa_table, size_t token_id, const std::
 				}
 
 			case regex_token_type_t::KLEENE_STAR:
+				std::cout << "KLEENE_STAR\n";
 				{
 				size_t newest_end_ghost_row = *(ghost_row_destination_stack.end() - 1);
 				size_t newest_start_ghost_row = *(ghost_row_source_stack.end() - 1);
@@ -145,10 +158,13 @@ nfa_table_t gen_nfa(const std::string &specification) noexcept {
 	allocate_nfa_row(result, { true, { } });
 
 	for (const std::string &line : lines) {
+		if (line.empty()) { continue; }
+
 		std::vector<std::string> parts = split(line, "->");
 
 		size_t token_id = std::atoi(parts[0].c_str());
 		const std::string &regex = parts[1];
+		std::cout << token_id << ", " << regex << '\n';
 
 		add_nfa_rows_for_regex(result, token_id, regex);
 	}

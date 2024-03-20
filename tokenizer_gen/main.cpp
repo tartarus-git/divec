@@ -16,12 +16,18 @@ std::string get_specification() noexcept {
 
 int main() {
 	std::string specification = get_specification();
+	std::cout << specification << '\n';
 
 	nfa_table_t nfa = gen_nfa(specification);
 
 	for (const auto &row : nfa.rows) {
 		for (const auto &element : row.elements) {
-			std::cout << (element.next != 0);
+			std::cout << element.next;
+		}
+		std::cout << " ; " << row.token_id;
+		std::cout << " ; ";
+		for (const auto &child : row.children) {
+			std::cout << child;
 		}
 		std::cout << '\n';
 	}
