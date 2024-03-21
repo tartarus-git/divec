@@ -5,7 +5,7 @@ OPTIMIZATION := -O0
 WARNING_FLAGS := -Wall -Wextra
 COMPILER_PREAMBLE := $(COMPILER) $(OPTIMIZATION) $(WARNING_FLAGS)
 
-.PHONY: all build lexer_generator test clean
+.PHONY: all build test clean
 
 all: build test
 
@@ -24,12 +24,16 @@ include .make_temp_file
 bin/libdivec_build/lexer.o: bin/libdivec_build/.dirstamp
 	$(COMPILER_PREAMBLE) -fPIC -I. -c src/lib/lexer.cpp -o bin/libdivec_build/lexer.o
 
-embed/lexer_table.h: lexer_generator embed/lexer.lexer_spec
+embed/lexer_table.h: embed/.dirstamp tokenizer_gen/bin/tokenizer_generator lexer.lexer_spec
 	./tokenizer_gen/bin/tokenizer_generator
-	cat embed/.temp_lexer_table | srcembed --varname raw_lexer_table c++ | aprepend --front -b 10 | aprepend --front '#pragma once' > embed/lexer_table.h
+	cat .temp_lexer_table | srcembed --varname raw_lexer_table c++ | aprepend --front -b 10 | aprepend --front '#pragma once' > embed/lexer_table.h
 
-lexer_generator:
+tokenizer_gen/bin/tokenizer_generator:
 	cd tokenizer_gen && $(MAKE)
+
+embed/.dirstamp:
+	mkdir -p embed
+	touch embed/.dirstamp
 
 # ----- libdivec END -----
 
