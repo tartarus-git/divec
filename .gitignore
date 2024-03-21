@@ -1,4 +1,5 @@
 bin
+embed
 *.swp
 .make_temp_file
-.temp_tokenizer_table
+.temp_lexer_table

@@ -6,7 +6,7 @@
 #include "nfa_gen.h"
 #include "dfa_gen.h"
 
-#define SPECIFICATION_PATH "tokenizer.tokenizer_spec"
+#define SPECIFICATION_PATH "lexer.lexer_spec"
 
 std::string get_specification() noexcept {
 	std::ifstream spec_file(SPECIFICATION_PATH);
@@ -65,5 +65,5 @@ int main() {
 		i++;
 	}
 
-	output_table_to_file(dfa, ".temp_tokenizer_table");
+	output_table_to_file(dfa, ".temp_lexer_table");
 }
