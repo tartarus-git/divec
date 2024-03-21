@@ -15,6 +15,15 @@ std::string get_specification() noexcept {
 	return buffer.str();
 }
 
+void output_table_to_file(const dfa_table_t &table, const char *path) noexcept {
+	std::ofstream table_file;
+	table_file.open(path, std::ios::out | std::ios::binary);
+
+	table_file.write((const char*)(table.rows.data()), table.rows.size() * sizeof(dfa_row_t));
+
+	table_file.close();
+}
+
 int main() {
 	std::string specification = get_specification();
 	std::cout << specification << '\n';
@@ -55,4 +64,6 @@ int main() {
 		std::cout << '\n';
 		i++;
 	}
+
+	output_table_to_file(dfa, ".temp_tokenizer_table");
 }

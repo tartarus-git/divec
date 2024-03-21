@@ -1,3 +1,4 @@
 bin
 *.swp
 .make_temp_file
+.temp_tokenizer_table
