@@ -40,7 +40,11 @@ int main() {
 
 	std::cout << "\n\n\n";
 
+	size_t i = 0;
 	for (const auto &row : dfa.rows) {
+
+		std::cout << i << "  ";
+
 		for (const auto &element : row.elements) {
 
 			if ((ssize_t)element.next < 0) {
@@ -50,6 +54,10 @@ int main() {
 
 			std::cout << element.next;
 		}
+
+		std::cout << " ; " << row.token_id;
+
 		std::cout << '\n';
+		i++;
 	}
 }

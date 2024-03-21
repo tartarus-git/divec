@@ -89,7 +89,7 @@ std::vector<size_t> follow_ghost_rows(const nfa_table_t &nfa_table, const std::v
 }
 
 size_t allocate_dfa_row(dfa_table_t &dfa_table) noexcept {
-	dfa_table.rows.push_back({ });
+	dfa_table.rows.push_back({ { }, (size_t)-1 });
 	return dfa_table.rows.size() - 1;
 }
 
@@ -100,6 +100,15 @@ void overwrite_dfa_row_next(dfa_table_t &dfa_table,
 
 	auto &row = dfa_table.rows[row_index];
 	row.elements[character].next = target;
+
+}
+
+void overwrite_dfa_row_token_id(dfa_table_t &dfa_table,
+				size_t row_index,
+				size_t token_id) noexcept {
+
+	auto &row = dfa_table.rows[row_index];
+	row.token_id = token_id;
 
 }
 
@@ -138,15 +147,7 @@ size_t shape_edges(dfa_table_t &dfa_table,
 		}
 	}
 
-	// TODO: Remove this, completely useless. Remove the above terminator_id stuff as well. Since we now
-	// do that stuff ahead of time at the bottom of the function, before the next recursion starts,
-	// we don't need the code for doing it inside of the recursions.
-	// TODO: Make sure to handle the first call of the function, because that edge-case needs to be handled extra if we are to remove
-	// the code that I just mentioned.
-	if (state_superposition.empty()) {
-		dfa_table.rows.erase(dfa_table.rows.begin() + current_dfa_row);
-		return terminator_id;
-	}
+	overwrite_dfa_row_token_id(dfa_table, current_dfa_row, terminator_id);
 
 	std::vector<std::vector<size_t>> new_state_superpositions;
 	std::vector<size_t> corresponding_nexts;
@@ -195,37 +196,11 @@ size_t shape_edges(dfa_table_t &dfa_table,
 
 		new_state_superpositions.push_back(new_state_superposition);
 
-	new_state_superposition = follow_ghost_rows(nfa_table, new_state_superposition);
-
-	size_t recursion_terminator_id = -1;
-
-	// NOTE: ssize_t is needed because or else i-- can cause a bug to happen
-	// where some things are ignored in the state_superposition vector.
-	for (ssize_t i = 0; i < new_state_superposition.size(); i++) {
-		const size_t &state = new_state_superposition[i];
-		if (is_ghost_row(nfa_table, state)) {
-			if (nfa_table.rows[state].children.empty()) {
-				recursion_terminator_id = nfa_table.rows[state].token_id;
-				new_state_superposition.erase(new_state_superposition.begin() + i);
-				i--;
-				continue;
-			}
-		}
-	}
-
-	std::cout << "rec term id: " << recursion_terminator_id << '\n';
-
-
 			size_t new_dfa_row = -1;
 
-			if (recursion_terminator_id != -1) {
-				overwrite_dfa_row_next(dfa_table, current_dfa_row, character, -recursion_terminator_id);
-				corresponding_nexts.push_back(-recursion_terminator_id);
-			} else {
-				new_dfa_row = allocate_dfa_row(dfa_table);
-				overwrite_dfa_row_next(dfa_table, current_dfa_row, character, new_dfa_row);
-				corresponding_nexts.push_back(new_dfa_row);
-			}
+			new_dfa_row = allocate_dfa_row(dfa_table);
+			overwrite_dfa_row_next(dfa_table, current_dfa_row, character, new_dfa_row);
+			corresponding_nexts.push_back(new_dfa_row);
 
 			for (const auto &superposition : new_state_superpositions) {
 				global_superposition_catalogue.push_back(superposition);
@@ -235,11 +210,8 @@ size_t shape_edges(dfa_table_t &dfa_table,
 				global_corresponding_nexts.push_back(next);
 			}
 
-			if (recursion_terminator_id != -1) {
-			} else {
-				shape_edges(dfa_table, nfa_table, new_state_superposition, new_dfa_row,
-					global_superposition_catalogue, global_corresponding_nexts);
-			}
+			shape_edges(dfa_table, nfa_table, new_state_superposition, new_dfa_row,
+				global_superposition_catalogue, global_corresponding_nexts);
 
 		}
 

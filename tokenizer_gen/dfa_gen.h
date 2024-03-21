@@ -5,12 +5,12 @@
 #include "nfa_gen.h"
 
 struct dfa_element_t {
-	// NOTE: negatives mean indices of the matches that are now matched.
 	size_t next;
 };
 
 struct dfa_row_t {
 	dfa_element_t elements[256];
+	size_t token_id;
 };
 
 struct dfa_table_t {
