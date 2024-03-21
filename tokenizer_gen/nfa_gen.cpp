@@ -8,7 +8,10 @@
 
 std::vector<regex_token_t> tokenize_regex(const std::string &regex) noexcept {
 	std::vector<regex_token_t> result;
-	for (const char &character : regex) {
+	for (size_t i = 0; i < regex.length(); i++) {
+
+		char character = regex[i];
+
 		switch (character) {
 		case '(':
 			result.push_back({ regex_token_type_t::SUBEXPRESSION_BEGIN });
@@ -23,12 +26,34 @@ std::vector<regex_token_t> tokenize_regex(const std::string &regex) noexcept {
 			result.push_back({ regex_token_type_t::KLEENE_STAR });
 			break;
 		// TODO: implement tokenization of [] expressions as filters.
+
+		case '\\':
+			i++;
+
+			character = regex[i];
+			switch (character) {
+
+			case 't':
+				character = '\t';
+				break;
+			case '0':
+				character = '\0';
+				break;
+			case 'n':
+				character = '\n';
+				break;
+
+			}
+
+			// FALLTHROUGH
+
 		default:
 			regex_token_t new_token = { regex_token_type_t::FILTER };
 			new_token.row_filter[(uint8_t)character] = true;
 			result.push_back(new_token);
 			break;
 		}
+
 	}
 	return result;
 }

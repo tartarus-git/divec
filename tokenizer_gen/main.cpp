@@ -47,12 +47,7 @@ int main() {
 
 		for (const auto &element : row.elements) {
 
-			if ((ssize_t)element.next < 0) {
-				std::cout << (char)('A' + -element.next);
-				continue;
-			}
-
-			std::cout << element.next;
+			std::cout << element.next << ':';
 		}
 
 		std::cout << " ; " << row.token_id;
