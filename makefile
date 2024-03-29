@@ -14,6 +14,8 @@ all: build test
 build: bin/libdivec.so
 
 libdivec_objects := \
+bin/libdivec_build/api.o \
+bin/libdivec_build/compiler.o \
 bin/libdivec_build/lexer.o \
 bin/libdivec_build/lexer_table.o
 

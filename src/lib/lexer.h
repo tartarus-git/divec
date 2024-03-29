@@ -3,7 +3,7 @@
 #include <cstddef>
 
 struct dive_token_t {
-	size_t token_id;
+	size_t id;
 	size_t begin;
 	size_t end;
 };
@@ -17,10 +17,20 @@ class lexer_t {
 	size_t current_row = 0;
 	size_t current_stream_position = 0;
 
-	size_t last_matched_token_id = -1;
-	size_t last_match_begin = current_stream_position;
-	size_t last_match_end;
+	dive_token_t current_token {
+		-1,
+		current_stream_position,
+		0
+	};
+
+	dive_token_t last_token {
+		-1,
+		0,
+		0
+	};
 
 public:
-	dive_token_t push_character(char character) noexcept;
+	bool push_character(char character) noexcept;
+
+	dive_token_t get_last_token() noexcept;
 };
