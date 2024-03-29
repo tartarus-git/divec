@@ -3,3 +3,4 @@ embed
 *.swp
 .make_temp_file
 .temp_lexer_table
+build_intermediates
