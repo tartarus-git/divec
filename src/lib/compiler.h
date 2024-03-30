@@ -3,6 +3,7 @@
 #include <cstdint>
 
 #include "compiler_error.h"
+//#include "build_log.h"
 #include "lexer.h"
 
 enum class dive_program_state_t : uint8_t {

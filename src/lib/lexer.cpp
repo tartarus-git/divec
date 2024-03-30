@@ -17,7 +17,7 @@ bool lexer_t::push_character(char character) noexcept {
 
 	if (element.next == 0) {
 		current_row = 0;
-		current_stream_position = current_match_end;
+		current_stream_position = current_token.end;
 
 		last_token = current_token;
 

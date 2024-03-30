@@ -9,10 +9,21 @@
 dive_program_t diveCreateProgram_inner(const char *source_code) noexcept {
 
 	dive_program_t result = (dive_program_t)std::malloc(sizeof(dive_program_t_inner));
+	if (result == nullptr) { return nullptr; }
+
+	const size_t source_code_size = std::strlen(source_code) * sizeof(char);
+
+	char *source_code_copy = (char*)std::malloc(source_code_size);
+	if (source_code_copy == nullptr) {
+		std::free(result);
+		return nullptr;
+	}
+
+	std::memcpy(source_code_copy, source_code, source_code_size);
 
 	*result = {
 		.state = dive_program_state_t::SOURCE,
-		.source_code = source_code,
+		.source_code = source_code_copy,
 		.tokens = nullptr
 	};
 
@@ -23,7 +34,7 @@ dive_program_t diveCreateProgram_inner(const char *source_code) noexcept {
 divec_error_t lex_program(dive_program_t program, dive_build_log_t build_log) noexcept {
 
 	switch (program->state) {
-	dive_program_state_t::SOURCE: break;
+	case dive_program_state_t::SOURCE: break;
 	default: return divec_error_t::ALREADY_DONE;
 	}
 
@@ -68,7 +79,7 @@ divec_error_t lex_program(dive_program_t program, dive_build_log_t build_log) no
 	program->tokens = (dive_token_t*)std::malloc(tokens_size);
 	if (program->tokens == nullptr) { return divec_error_t::OUT_OF_MEMORY; }
 
-	std::memcpy(program->tokens, tokens.data(), tokens_size);
+	std::memcpy((dive_token_t*)program->tokens, tokens.data(), tokens_size);
 
 	program->state = dive_program_state_t::LEXED;
 
@@ -87,8 +98,8 @@ divec_error_t diveCompileProgram_inner(dive_program_t program, dive_build_log_t 
 
 divec_error_t diveReleaseProgram_inner(dive_program_t program) noexcept {
 
-	std::free(program->source_code);
-	std::free(program->tokens);
+	std::free((char*)program->source_code);
+	std::free((dive_token_t*)program->tokens);
 
 	std::free(program);
 

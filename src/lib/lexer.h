@@ -18,13 +18,13 @@ class lexer_t {
 	size_t current_stream_position = 0;
 
 	dive_token_t current_token {
-		-1,
+		(size_t)-1,
 		current_stream_position,
 		0
 	};
 
 	dive_token_t last_token {
-		-1,
+		(size_t)-1,
 		0,
 		0
 	};
