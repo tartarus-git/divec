@@ -3,37 +3,90 @@
 #include <cstddef>
 #include <cstdint>
 
+// size is very conservative because I don't want to have to break ABI
+// in the future if I add a bunch more tokens
+enum class dive_token_type_t : uint32_t {
+	EOF_TOKEN,
+	WHITESPACE,
+	IF,
+	WHILE,
+	FOR,
+	OPENING_PARENTHESIS,
+	CLOSING_PARENTHESIS,
+	OPENING_SQUARE_BRACKET,
+	CLOSING_SQUARE_BRACKET,
+	DOT,
+	OPENING_ANGEL_BRACKET,
+	CLOSING_ANGEL_BRACKET,
+	FLOAT,
+	DOUBLE,
+	DECIMAL,
+	INT32_T,
+	INT64_T,
+	UINT32_T,
+	UINT64_T,
+	INT16_T,
+	UINT16_T,
+	INT8_T,
+	UINT8_T,
+	NEWLINE,
+	SEMICOLON,
+	COMMA,
+	IDENTIFIER,
+	PLUS,
+	MINUS,
+	DIVIDE,
+	ASTERISK,
+	LESS_THAN,
+	GREATER_THAN,
+	LEFT_SHIFT,
+	RIGHT_SHIFT,
+	ASSIGNMENT_EQUAL,
+	EQUALITY_EQUAL,
+	ASSIGNMENT_PLUS,
+	ASSIGNMENT_MINUS,
+	ASSIGNMENT_DIVIDE,
+	ASSIGNMENT_MULTIPLY,
+	ASSIGNMENT_RIGHT_SHIFT,
+	ASSIGNMENT_LEFT_SHIFT,
+	BITWISE_AND,
+	BITWISE_OR,
+	BITWISE_XOR,
+	BITWISE_NOT,
+	LOGICAL_AND,
+	LOGICAL_OR,
+	LOGICAL_NOT,
+	NOT_EQUAL,
+	GREATER_THAN_OR_EQUAL,
+	LESS_THAN_OR_EQUAL,
+	BACKSLASH,
+	TODO1,
+	TODO2,
+	VOID,
+	INT32_LITERAL,
+	INVALID_TOKEN
+};
+
 struct dive_token_t {
-	size_t id;
+	dive_token_type_t type;
 	size_t begin;
 	size_t end;
 };
 
-struct lexer_dfa_table_element_t {
-	size_t next;
-};
-
 struct lexer_dfa_table_row_t {
-	lexer_dfa_table_element_t elements[257];
-	size_t token_id;
+	size_t edges[257];
+	uint32_t token_id;
 };
 
 class lexer_t {
 	size_t current_row = 0;
 	size_t current_stream_position = 0;
 
-	dive_token_t current_token {
-		(size_t)-1,
-		current_stream_position,
-		0
-	};
+	uint32_t token_id = -1;
+	size_t token_begin = current_stream_position;
+	size_t token_end = token_begin;
 
-	dive_token_t last_token {
-		(size_t)-1,
-		0,
-		0
-	};
-
+	// character MUST be in range 0-256 inclusive on both sides
 	bool push_inner(uint16_t character) noexcept;
 
 public:

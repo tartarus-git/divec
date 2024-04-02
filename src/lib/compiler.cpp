@@ -60,32 +60,33 @@ divec_error_t lex_program(dive_program_t program, dive_build_log_t build_log) no
 			match_found = lexer.push_character(*source_iter);
 		}
 
-		std::cout << "character: " << *source_iter << '\n';
-
 		if (match_found) {
 
 			dive_token_t token = lexer.get_last_token();
 
-			if (token.id == -1) {
+			if (token.type == dive_token_type_t::INVALID_TOKEN) {
 
 				if (build_log != nullptr) {
 					// TODO: Put error in build log.
 				}
 
-				std::cerr << "last end: " << tokens.end()->end << '\n';
-
 				return divec_error_t::BUILD_ERROR;
 			}
+
+			std::cout << (int)(token.type) << '\n';
 
 			tokens.push_back(token);
 
 			// If we've processed the EOF token, then stop processing.
-			if (tokens.back().id == 0) { break; }
+			if (tokens.back().type == dive_token_type_t::EOF_TOKEN) { break; }
 
 			source_iter = program->source_code + token.end;
 			continue;
 		}
 
+		// keep this static if we're at the end, that way we can just keep pushing EOFs
+		// onto the thing until we get an EOF token.
+		// TODO: Think about more elegant ways to structure this function.
 		if (*source_iter != '\0') { source_iter++; }
 	}
 
@@ -99,6 +100,8 @@ divec_error_t lex_program(dive_program_t program, dive_build_log_t build_log) no
 
 	std::memcpy((dive_token_t*)program->tokens, tokens.data(), tokens_size);
 
+	program->tokens_length = tokens.size();
+
 	program->state = dive_program_state_t::LEXED;
 
 	return divec_error_t::SUCCESS;
@@ -109,6 +112,10 @@ divec_error_t diveCompileProgram_inner(dive_program_t program, dive_build_log_t 
 
 	divec_error_t err = lex_program(program, build_log);
 	if (err != divec_error_t::SUCCESS) { return err; }
+
+	for (size_t i = 0; i < program->tokens_length; i++) {
+		std::cout << (int)(program->tokens[i].type) << "\n";
+	}
 
 	return divec_error_t::SUCCESS;
 

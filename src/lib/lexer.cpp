@@ -2,9 +2,6 @@
 
 #include <cstdint>
 
-// TODO: Remove this later.
-#include <iostream>
-
 extern "C" {
 	// These symbols are literally located at the start and end of the data.
 	// They don't have extra storage that contains pointers to the start and end of the data.
@@ -20,31 +17,20 @@ const lexer_dfa_table_row_t *lexer_table_end = (lexer_dfa_table_row_t*)&_binary_
 bool lexer_t::push_inner(uint16_t character) noexcept {
 	const lexer_dfa_table_row_t &row = lexer_table_begin[current_row];
 
-	std::cout << current_row << '\n';
-
 	if (row.token_id != -1) {
-		current_token.id = row.token_id;
-		current_token.end = current_stream_position;
+		token_id = row.token_id;
+		token_end = current_stream_position;
 	}
 
-	const lexer_dfa_table_element_t &element = row.elements[character];
+	const size_t &edge = row.edges[character];
 
-
-	if (element.next == 0) {
-		std::cout << "token matched: " << current_token.id << '\n';
-
+	if (edge == 0) {
 		current_row = 0;
-		current_stream_position = current_token.end;
-
-		last_token = current_token;
-
-		current_token.id = -1;
-		current_token.begin = current_token.end;
-
+		current_stream_position = token_end;
 		return true;
 	}
 
-	current_row = element.next;
+	current_row = edge;
 	current_stream_position++;
 
 	return false;
@@ -60,4 +46,20 @@ bool lexer_t::push_eof() noexcept {
 	return push_inner(256);
 }
 
-dive_token_t lexer_t::get_last_token() noexcept { return last_token; }
+dive_token_t lexer_t::get_last_token() noexcept {
+	dive_token_type_t token_type;
+	switch (token_id) {
+	case (uint32_t)-1:
+		token_type = dive_token_type_t::INVALID_TOKEN;
+		break;
+	default:
+		token_type = (dive_token_type_t)token_id;
+		break;
+	}
+	dive_token_t result { token_type, token_begin, token_end };
+
+	token_id = -1;
+	token_begin = token_end;
+
+	return result;
+}

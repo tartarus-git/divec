@@ -23,6 +23,7 @@ struct dive_program_t_inner {
 	const char *source_code;
 
 	const dive_token_t *tokens;
+	size_t tokens_length;
 
 };
 
