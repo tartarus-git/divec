@@ -69,3 +69,5 @@
 54->'' TODO: same thing, but slightly different and with only one character or an escape code inside the single quotes
 
 55->void
+
+56->(1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*

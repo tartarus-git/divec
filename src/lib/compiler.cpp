@@ -6,6 +6,9 @@
 
 #include "lexer.h"
 
+// TODO: Remove later.
+#include <iostream>
+
 dive_program_t diveCreateProgram_inner(const char *source_code) noexcept {
 
 	dive_program_t result = (dive_program_t)std::malloc(sizeof(dive_program_t_inner));
@@ -50,7 +53,14 @@ divec_error_t lex_program(dive_program_t program, dive_build_log_t build_log) no
 	lexer_t lexer;
 
 	while (true) {
-		bool match_found = lexer.push_character(*source_iter);
+		bool match_found;
+		if (*source_iter == '\0') {
+			match_found = lexer.push_eof();
+		} else {
+			match_found = lexer.push_character(*source_iter);
+		}
+
+		std::cout << "character: " << *source_iter << '\n';
 
 		if (match_found) {
 
@@ -62,17 +72,25 @@ divec_error_t lex_program(dive_program_t program, dive_build_log_t build_log) no
 					// TODO: Put error in build log.
 				}
 
+				std::cerr << "last end: " << tokens.end()->end << '\n';
+
 				return divec_error_t::BUILD_ERROR;
 			}
 
 			tokens.push_back(token);
 
+			// If we've processed the EOF token, then stop processing.
+			if (tokens.back().id == 0) { break; }
+
 			source_iter = program->source_code + token.end;
 			continue;
 		}
 
-		source_iter++;
+		if (*source_iter != '\0') { source_iter++; }
 	}
+
+	// pop EOF token off of vector, we don't need that one for parsing.
+	tokens.pop_back();
 
 	const size_t tokens_size = tokens.size() * sizeof(dive_token_t);
 

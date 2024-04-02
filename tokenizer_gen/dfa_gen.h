@@ -9,7 +9,7 @@ struct dfa_element_t {
 };
 
 struct dfa_row_t {
-	dfa_element_t elements[256];
+	dfa_element_t elements[257];
 	size_t token_id;
 };
 

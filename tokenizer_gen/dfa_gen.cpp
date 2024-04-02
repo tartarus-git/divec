@@ -95,7 +95,7 @@ size_t allocate_dfa_row(dfa_table_t &dfa_table) noexcept {
 
 void overwrite_dfa_row_next(dfa_table_t &dfa_table,
 			    size_t row_index,
-			    uint8_t character,
+			    uint16_t character,
 			    size_t target) noexcept {
 
 	auto &row = dfa_table.rows[row_index];
@@ -154,7 +154,7 @@ size_t shape_edges(dfa_table_t &dfa_table,
 
 	std::cout << '\n';
 
-	for (uint16_t character = 0; character < 256; character++) {
+	for (uint16_t character = 0; character < 257; character++) {
 
 		std::vector<size_t> new_state_superposition;
 

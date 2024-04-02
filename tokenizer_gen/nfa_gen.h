@@ -23,7 +23,7 @@ struct nfa_element_t {
 
 struct nfa_row_t {
 	bool ghost_row;
-	nfa_element_t elements[256];
+	nfa_element_t elements[257];
 	std::vector<size_t> children;
 	size_t token_id;
 };

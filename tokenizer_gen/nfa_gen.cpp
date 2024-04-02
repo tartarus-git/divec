@@ -192,6 +192,16 @@ void add_nfa_rows_for_regex(nfa_table_t &nfa_table, size_t token_id, const std::
 	patch_from_ghost_row(nfa_table, last_row, *(ghost_row_destination_stack.end() - 1));
 }
 
+void add_eof_mechanism(nfa_table_t &table, size_t token_id) noexcept {
+	size_t eof_state = allocate_ghost_row(table);
+	table.rows[eof_state].token_id = token_id;
+
+	nfa_row_t eof_filter = { false, { } };
+	eof_filter.elements[256].next = eof_state;
+	size_t eof_filter_index = allocate_nfa_row(table, eof_filter);
+	patch_from_ghost_row(table, 0, eof_filter_index);
+}
+
 nfa_table_t gen_nfa(const std::string &specification) noexcept {
 	std::vector<std::string> lines = split(specification, "\n");
 
@@ -199,12 +209,14 @@ nfa_table_t gen_nfa(const std::string &specification) noexcept {
 
 	allocate_nfa_row(result, { true, { } });
 
+	add_eof_mechanism(result, 0);
+
 	for (const std::string &line : lines) {
 		if (line.empty()) { continue; }
 
 		std::vector<std::string> parts = split(line, "->");
 
-		size_t token_id = std::atoi(parts[0].c_str());
+		size_t token_id = std::atoi(parts[0].c_str()) + 1;
 		const std::string &regex = parts[1];
 		std::cout << token_id << ", " << regex << '\n';
 
