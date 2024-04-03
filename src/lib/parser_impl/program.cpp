@@ -2,7 +2,7 @@
 
 #include <cstdlib>
 
-dive_ast_program_t* parser_t::parse_program(build_log_t *build_log, divec_error_t &err) noexcept {
+dive_ast_program_t* parser_t::parse_program(dive_build_log_t build_log, divec_error_t &err) noexcept {
 
 	err = divec_error_t::SUCCESS;
 
@@ -12,15 +12,33 @@ dive_ast_program_t* parser_t::parse_program(build_log_t *build_log, divec_error_
 		return nullptr;
 	}
 
+	result->init();
+
 	while (true) {
 		dive_ast_function_t *function_entry = parse_function(build_log, err);
-		if (err != divec_error_t::SUCCESS) { return nullptr; }
+		if (err != divec_error_t::SUCCESS) {
+			std::free(result);
+			return nullptr;
+		}
 
-		result->push_function(function_entry);
+		err = result->push_function(function_entry);
+		if (err != divec_error_t::SUCCESS) {
+
+			divec_error_t sub_err = function_entry->free_children();
+			if (sub_err != divec_error_t::SUCCESS) {
+				err = divec_error_t::CATASTROPHIC_FAILURE;
+				// FALLTHROUGH
+			}
+
+			std::free(function_entry);
+			std::free(result);
+			return nullptr;
+
+		}
 
 		if (peek_token(1).type == dive_token_type_t::EOF_TOKEN) { break; }
 	}
 
-	return divec_error_t::SUCCESS;
+	return result;
 
 }

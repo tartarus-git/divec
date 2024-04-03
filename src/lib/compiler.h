@@ -3,7 +3,7 @@
 #include <cstdint>
 
 #include "compiler_error.h"
-//#include "build_log.h"
+#include "build_log.h"
 #include "lexer.h"
 
 enum class dive_program_state_t : uint8_t {
@@ -28,12 +28,6 @@ struct dive_program_t_inner {
 };
 
 using dive_program_t = dive_program_t_inner*;
-
-struct dive_build_log_t_inner {
-
-};
-
-using dive_build_log_t = dive_build_log_t_inner*;
 
 dive_program_t diveCreateProgram_inner(const char *source_code) noexcept;
 

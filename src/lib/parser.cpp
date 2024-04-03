@@ -19,6 +19,8 @@ const dive_token_t& parser_t::peek_token(size_t offset) noexcept {
 	if (offset >= tokens_end - tokens_head) {
 		return *tokens_end;
 	}
+	// TODO: You should probably scratch the above and just trust that the input is ok.
+	// More efficient that way, faster.
 	return *(tokens_head + offset);
 }
 

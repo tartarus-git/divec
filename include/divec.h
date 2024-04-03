@@ -5,8 +5,8 @@
 extern "C" {
 #endif
 
-	// We DON'T explicitly set the underlying type, see note in compiler_error.h file.
-	enum divec_error_t {
+	// We overestimate width of this type, see note in compiler_error.h
+	enum divec_error_t : uint32_t {
 		DIVEC_SUCCESS,
 		DIVEC_OUT_OF_MEMORY,
 		DIVEC_ALREADY_DONE,

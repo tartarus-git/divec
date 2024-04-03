@@ -3,8 +3,15 @@
 #include <cstddef>
 #include <cstdint>
 
-// size is very conservative because I don't want to have to break ABI
-// in the future if I add a bunch more tokens
+// Size is very conservative because I don't want to have to break API
+// in the future if I add a bunch more tokens.
+// This enum might not end up in a user-facing position,
+// but the user will be able to receive tokens in some way,
+// and those will come from this internal representation.
+// So to make the "conversion" easier and to avoid possible bugs, this
+// has a conservative width as well. If this ends
+// up being user-facing, it'll have to have the conservative width anyway because
+// API.
 enum class dive_token_type_t : uint32_t {
 	EOF_TOKEN,
 	WHITESPACE,
