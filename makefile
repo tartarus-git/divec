@@ -24,7 +24,15 @@ libdivec_so_objects := \
 bin/libdivec_so_build/api.o \
 bin/libdivec_so_build/compiler.o \
 bin/libdivec_so_build/lexer.o \
-bin/libdivec_so_build/lexer_table.o
+bin/libdivec_so_build/lexer_table.o \
+bin/libdivec_so_build/dive_ast_impl/program.o \
+bin/libdivec_so_build/dive_ast_impl/function.o \
+bin/libdivec_so_build/dive_ast_impl/statement.o \
+bin/libdivec_so_build/parser.o \
+bin/libdivec_so_build/parser_impl/program.o \
+bin/libdivec_so_build/parser_impl/function.o \
+bin/libdivec_so_build/parser_impl/statement.o \
+bin/libdivec_so_build/helpers.o
 
 bin/libdivec.so: bin/.dirstamp $(libdivec_so_objects)
 	$(COMPILER_PREAMBLE) -shared -fvisibility=hidden $(libdivec_so_objects) -o bin/libdivec.so
@@ -41,6 +49,8 @@ bin/libdivec_so_build/compiler.o: bin/libdivec_so_build/.dirstamp
 	$(EMIT_ASSEMBLY_PREAMBLE) src/lib/compiler.cpp -o bin/libdivec_so_build/compiler.asm
 	$(COMPILER_PREAMBLE) -fPIC -c src/lib/compiler.cpp -o bin/libdivec_so_build/compiler.o
 
+# ----- lexer BEGIN -----
+
 $(shell $(COMPILER) -MM src/lib/lexer.cpp | aprepend --front bin/libdivec_so_build/ > .make_temp_file)
 include .make_temp_file
 bin/libdivec_so_build/lexer.o: bin/libdivec_so_build/.dirstamp
@@ -54,6 +64,64 @@ bin/libdivec_so_build/lexer_table.o: bin/libdivec_so_build/.dirstamp build_inter
 
 tokenizer_gen/bin/tokenizer_generator:
 	cd tokenizer_gen && $(MAKE)
+
+# ----- lexer END -----
+
+# ----- dive_ast BEGIN -----
+
+$(shell $(COMPILER) -MM src/lib/dive_ast_impl/program.cpp | aprepend --front bin/libdivec_so_build/dive_ast_impl/ > .make_temp_file)
+include .make_temp_file
+bin/libdivec_so_build/dive_ast_impl/program.o: bin/libdivec_so_build/dive_ast_impl/.dirstamp
+	$(EMIT_ASSEMBLY_PREAMBLE) src/lib/dive_ast_impl/program.cpp -o bin/libdivec_so_build/dive_ast_impl/program.asm
+	$(COMPILER_PREAMBLE) -fPIC -c src/lib/dive_ast_impl/program.cpp -o bin/libdivec_so_build/dive_ast_impl/program.o
+
+$(shell $(COMPILER) -MM src/lib/dive_ast_impl/function.cpp | aprepend --front bin/libdivec_so_build/dive_ast_impl/ > .make_temp_file)
+include .make_temp_file
+bin/libdivec_so_build/dive_ast_impl/function.o: bin/libdivec_so_build/dive_ast_impl/.dirstamp
+	$(EMIT_ASSEMBLY_PREAMBLE) src/lib/dive_ast_impl/function.cpp -o bin/libdivec_so_build/dive_ast_impl/function.asm
+	$(COMPILER_PREAMBLE) -fPIC -c src/lib/dive_ast_impl/function.cpp -o bin/libdivec_so_build/dive_ast_impl/function.o
+
+$(shell $(COMPILER) -MM src/lib/dive_ast_impl/statement.cpp | aprepend --front bin/libdivec_so_build/dive_ast_impl/ > .make_temp_file)
+include .make_temp_file
+bin/libdivec_so_build/dive_ast_impl/statement.o: bin/libdivec_so_build/dive_ast_impl/.dirstamp
+	$(EMIT_ASSEMBLY_PREAMBLE) src/lib/dive_ast_impl/statement.cpp -o bin/libdivec_so_build/dive_ast_impl/statement.asm
+	$(COMPILER_PREAMBLE) -fPIC -c src/lib/dive_ast_impl/statement.cpp -o bin/libdivec_so_build/dive_ast_impl/statement.o
+
+# ----- dive_ast END -----
+
+# ----- parser BEGIN -----
+
+$(shell $(COMPILER) -MM src/lib/parser.cpp | aprepend --front bin/libdivec_so_build/ > .make_temp_file)
+include .make_temp_file
+bin/libdivec_so_build/parser.o: bin/libdivec_so_build/.dirstamp
+	$(EMIT_ASSEMBLY_PREAMBLE) src/lib/parser.cpp -o bin/libdivec_so_build/parser.asm
+	$(COMPILER_PREAMBLE) -fPIC -c src/lib/parser.cpp -o bin/libdivec_so_build/parser.o
+
+$(shell $(COMPILER) -MM src/lib/parser_impl/program.cpp | aprepend --front bin/libdivec_so_build/parser_impl/ > .make_temp_file)
+include .make_temp_file
+bin/libdivec_so_build/parser_impl/program.o: bin/libdivec_so_build/parser_impl/.dirstamp
+	$(EMIT_ASSEMBLY_PREAMBLE) src/lib/parser_impl/program.cpp -o bin/libdivec_so_build/parser_impl/program.asm
+	$(COMPILER_PREAMBLE) -fPIC -c src/lib/parser_impl/program.cpp -o bin/libdivec_so_build/parser_impl/program.o
+
+$(shell $(COMPILER) -MM src/lib/parser_impl/function.cpp | aprepend --front bin/libdivec_so_build/parser_impl/ > .make_temp_file)
+include .make_temp_file
+bin/libdivec_so_build/parser_impl/function.o: bin/libdivec_so_build/parser_impl/.dirstamp
+	$(EMIT_ASSEMBLY_PREAMBLE) src/lib/parser_impl/function.cpp -o bin/libdivec_so_build/parser_impl/function.asm
+	$(COMPILER_PREAMBLE) -fPIC -c src/lib/parser_impl/function.cpp -o bin/libdivec_so_build/parser_impl/function.o
+
+$(shell $(COMPILER) -MM src/lib/parser_impl/statement.cpp | aprepend --front bin/libdivec_so_build/parser_impl/ > .make_temp_file)
+include .make_temp_file
+bin/libdivec_so_build/parser_impl/statement.o: bin/libdivec_so_build/parser_impl/.dirstamp
+	$(EMIT_ASSEMBLY_PREAMBLE) src/lib/parser_impl/statement.cpp -o bin/libdivec_so_build/parser_impl/statement.asm
+	$(COMPILER_PREAMBLE) -fPIC -c src/lib/parser_impl/statement.cpp -o bin/libdivec_so_build/parser_impl/statement.o
+
+# ----- parser END -----
+
+$(shell $(COMPILER) -MM src/lib/helpers.cpp | aprepend --front bin/libdivec_so_build/ > .make_temp_file)
+include .make_temp_file
+bin/libdivec_so_build/helpers.o: bin/libdivec_so_build/.dirstamp
+	$(EMIT_ASSEMBLY_PREAMBLE) src/lib/helpers.cpp -o bin/libdivec_so_build/helpers.asm
+	$(COMPILER_PREAMBLE) -fPIC -c src/lib/helpers.cpp -o bin/libdivec_so_build/helpers.o
 
 # ----- libdivec END -----
 
@@ -78,6 +146,14 @@ bin/test_build/main.o: bin/test_build/.dirstamp
 bin/libdivec_so_build/.dirstamp: bin/.dirstamp
 	mkdir -p bin/libdivec_so_build
 	touch bin/libdivec_so_build/.dirstamp
+
+bin/libdivec_so_build/dive_ast_impl/.dirstamp: bin/libdivec_so_build/.dirstamp
+	mkdir -p bin/libdivec_so_build/dive_ast_impl
+	touch bin/libdivec_so_build/dive_ast_impl/.dirstamp
+
+bin/libdivec_so_build/parser_impl/.dirstamp: bin/libdivec_so_build/.dirstamp
+	mkdir -p bin/libdivec_so_build/parser_impl
+	touch bin/libdivec_so_build/parser_impl/.dirstamp
 
 bin/test_build/.dirstamp: bin/.dirstamp
 	mkdir -p bin/test_build

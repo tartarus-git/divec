@@ -34,7 +34,7 @@ dive_program_t diveCreateProgram_inner(const char *source_code) noexcept {
 
 }
 
-divec_error_t lex_program(dive_program_t program, dive_build_log_t build_log) noexcept {
+static divec_error_t lex_program(dive_program_t program, dive_build_log_t build_log) noexcept {
 
 	switch (program->state) {
 	case dive_program_state_t::SOURCE: break;

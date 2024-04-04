@@ -13,8 +13,12 @@ namespace helpers {
 	};
 
 	template <typename original_t>
-	struct maybe_const<original_t, const original_t>
-	struct maybe_const {
+	struct maybe_const<original_t, original_t> {
+		constexpr bool value = true;
+	}
+
+	template <typename original_t>
+	struct maybe_const<original_t, const original_t> {
 		constexpr bool value = true;
 	};
 
