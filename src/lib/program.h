@@ -4,6 +4,7 @@
 
 #include "compiler_error.h"
 #include "dive_token.h"
+#include "dive_ast.h"
 
 enum class dive_program_state_t : uint8_t {
 	SOURCE,
@@ -24,6 +25,8 @@ struct dive_program_t_inner {
 
 	const dive_token_t *tokens;
 	size_t tokens_length;
+
+	dive_ast_program_t *dive_ast;
 
 };
 

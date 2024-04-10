@@ -16,11 +16,25 @@ dive_ast_statement_t* parser_t::parse_statement(dive_build_log_t build_log, dive
 
 	result->type = dive_ast_statement_type_t::EXPRESSION;
 
+	if (get_next_token().type != dive_token_type_t::OPENING_ANGEL_BRACKET) {
+		err = divec_error_t::BUILD_ERROR;
+		std::free(result);
+		// TODO: Same todos as below.
+		return nullptr;
+	}
+
 	if (get_next_token().type != dive_token_type_t::IDENTIFIER) {
 		err = divec_error_t::BUILD_ERROR;
 		// TODO: append to build log
 		std::free(result);
 		// TODO: consider free_children, and also put it in program.cpp as well if your gonan put it everywhere else.
+		return nullptr;
+	}
+
+	if (get_next_token().type != dive_token_type_t::CLOSING_ANGEL_BRACKET) {
+		err = divec_error_t::BUILD_ERROR;
+		std::free(result);
+		// TODO: Same todos as above.
 		return nullptr;
 	}
 

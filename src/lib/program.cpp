@@ -25,7 +25,8 @@ dive_program_t diveCreateProgram_inner(const char *source_code) noexcept {
 	*result = {
 		.state = dive_program_state_t::SOURCE,
 		.source_code = source_code_copy,
-		.tokens = nullptr
+		.tokens = nullptr,
+		.dive_ast = nullptr
 	};
 
 	return result;
@@ -36,6 +37,7 @@ divec_error_t diveReleaseProgram_inner(dive_program_t program) noexcept {
 
 	std::free((char*)program->source_code);
 	std::free((dive_token_t*)program->tokens);
+	std::free(program->dive_ast);
 
 	std::free(program);
 

@@ -6,7 +6,7 @@ dive_ast_type_t parser_t::parse_type(dive_build_log_t build_log, divec_error_t &
 
 	dive_ast_type_t result;
 
-	switch (peek_token(1).type) {
+	switch (peek_token(0).type) {
 		// TODO: Check for const modifiers or whatever.
 		default: break;
 	}

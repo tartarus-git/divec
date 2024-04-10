@@ -2,6 +2,9 @@
 
 #include <cstdlib>
 
+// TODO: remove this later
+#include <iostream>
+
 dive_ast_function_t* parser_t::parse_function(dive_build_log_t build_log, divec_error_t &err) noexcept {
 
 	err = divec_error_t::SUCCESS;
@@ -21,11 +24,15 @@ dive_ast_function_t* parser_t::parse_function(dive_build_log_t build_log, divec_
 		return nullptr;
 	}
 
+	std::cout << "finished parsing return type!\n";
+
 	result->name = parse_identifier(build_log, err);
 	if (err != divec_error_t::SUCCESS) {
 		std::free(result);
 		return nullptr;
 	}
+
+	std::cout << "finished parsing function name!\n";
 
 	if (get_next_token().type != dive_token_type_t::OPENING_PARENTHESIS) {
 		err = divec_error_t::BUILD_ERROR;
@@ -34,7 +41,9 @@ dive_ast_function_t* parser_t::parse_function(dive_build_log_t build_log, divec_
 		return nullptr;
 	}
 
-	if (peek_token(1).type != dive_token_type_t::CLOSING_PARENTHESIS) {
+	std::cout << "finished parsing opening parenthesis!\n";
+
+	if (peek_token(0).type != dive_token_type_t::CLOSING_PARENTHESIS) {
 
 		while (true) {
 
@@ -59,7 +68,7 @@ dive_ast_function_t* parser_t::parse_function(dive_build_log_t build_log, divec_
 				return nullptr;
 			}
 
-			if (peek_token(1).type == dive_token_type_t::CLOSING_PARENTHESIS) { break; }
+			if (peek_token(0).type == dive_token_type_t::CLOSING_PARENTHESIS) { break; }
 
 			if (get_next_token().type != dive_token_type_t::COMMA) {
 				err = divec_error_t::BUILD_ERROR;
@@ -73,10 +82,12 @@ dive_ast_function_t* parser_t::parse_function(dive_build_log_t build_log, divec_
 
 	}
 
+	std::cout << "finished parsing arguments!\n";
+
 	// take parenthesis from queue
 	get_next_token();
 
-	if (peek_token(1).type != dive_token_type_t::OPENING_ANGEL_BRACKET) {
+	if (peek_token(0).type != dive_token_type_t::OPENING_ANGEL_BRACKET) {
 		err = divec_error_t::BUILD_ERROR;
 		// TODO: append it to build log
 		result->free_children();
@@ -84,12 +95,16 @@ dive_ast_function_t* parser_t::parse_function(dive_build_log_t build_log, divec_
 		return nullptr;
 	}
 
+	std::cout << "got to just before statement parsing!\n";
+
 	result->body = parse_statement(build_log, err);
 	if (err != divec_error_t::SUCCESS) {
 		result->free_children();
 		std::free(result);
 		return nullptr;
 	}
+
+	std::cout << "finished parsing statement!\n";
 
 	return result;
 

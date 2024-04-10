@@ -1,5 +1,8 @@
 #include "parser.h"
 
+// TODO: remove this later
+#include <iostream>
+
 const dive_token_t& parser_t::get_next_token() noexcept {
 
 	// TODO: You should keep the EOF token in the token list, saves you from storing the length of the list
@@ -48,6 +51,19 @@ parser_t::parser_t(dive_program_t program, divec_error_t &err) noexcept {
 }
 
 divec_error_t diveParseProgram_inner(dive_program_t program, dive_build_log_t build_log) noexcept {
-	return divec_error_t::OUT_OF_MEMORY;
-	// TODO: implement this function.
+
+	divec_error_t err;
+
+	parser_t parser(program, err);
+	if (err != divec_error_t::SUCCESS) { return err; }
+
+	std::cout << "consructed parser!\n";
+
+	program->dive_ast = parser.parse_program(build_log, err);
+	if (err != divec_error_t::SUCCESS) { return err; }
+
+	program->state = dive_program_state_t::PARSED;
+
+	return divec_error_t::SUCCESS;
+
 }

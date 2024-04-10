@@ -30,6 +30,7 @@ int main() {
 		std::exit(EXIT_FAILURE);
 	default:
 		std::cerr << "libdivec test: error: unknown error\n";
+		std::cerr << "err number: " << err << '\n';
 		std::exit(EXIT_FAILURE);
 	}
 

@@ -12,6 +12,7 @@ extern "C" {
 		DIVEC_SUCCESS,
 		DIVEC_OUT_OF_MEMORY,
 		DIVEC_ALREADY_DONE,
+		OBJECT_NOT_READY,
 		DIVEC_BUILD_ERROR,
 		DIVEC_GENERAL_FAILURE,
 		DIVEC_CATASTROPHIC_FAILURE	// Used for when the best option is for program to kill itself.
