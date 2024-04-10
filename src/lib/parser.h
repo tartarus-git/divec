@@ -2,7 +2,7 @@
 
 #include "compiler_error.h"
 #include "build_log.h"
-#include "lexer.h"
+#include "dive_token.h"
 #include "dive_ast.h"
 
 class parser_t {

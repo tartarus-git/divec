@@ -1,18 +1,16 @@
 #include "lexer.h"
 
-#include <cstdint>
-
 extern "C" {
 	// These symbols are literally located at the start and end of the data.
 	// They don't have extra storage that contains pointers to the start and end of the data.
 	// They literally ARE the start and end of the data.
 	// That's why we can't use classic pointer pattern here.
-	extern char _binary_lexer_table_start;
-	extern char _binary_lexer_table_end;
+	extern lexer_dfa_table_row_t _binary_lexer_table_start;
+	extern lexer_dfa_table_row_t _binary_lexer_table_end;
 }
 
-const lexer_dfa_table_row_t *lexer_table_begin = (lexer_dfa_table_row_t*)&_binary_lexer_table_start;
-const lexer_dfa_table_row_t *lexer_table_end = (lexer_dfa_table_row_t*)&_binary_lexer_table_end;
+const lexer_dfa_table_row_t *lexer_table_begin = _binary_lexer_table_start;
+const lexer_dfa_table_row_t *lexer_table_end = _binary_lexer_table_end;
 
 bool lexer_t::push_inner(uint16_t character) noexcept {
 	const lexer_dfa_table_row_t &row = lexer_table_begin[current_row];
@@ -62,4 +60,78 @@ dive_token_t lexer_t::get_last_token() noexcept {
 	token_begin = token_end;
 
 	return result;
+}
+
+divec_error_t diveLexProgram_inner(dive_program_t program, dive_build_log_t build_log) noexcept {
+
+	switch (program->state) {
+	case dive_program_state_t::SOURCE: break;
+	default: return divec_error_t::ALREADY_DONE;
+	}
+
+	const char *source_iter = program->source_code;
+
+	// TODO: Create your own vector implementation that allows to catch the out of memory case without
+	// exceptions. Not that the standard version even allows you to do it with exceptions. It's bad.
+	// Documentation is bad. C++ std is bad in general.
+	// Also your own custom one could have orphan functionality, where it lets you take ownership over it's
+	// memory before killing itself.
+	std::vector<dive_token_t> tokens;
+
+	lexer_t lexer;
+
+	while (true) {
+		bool match_found;
+		if (*source_iter == '\0') {
+			match_found = lexer.push_eof();
+		} else {
+			match_found = lexer.push_character(*source_iter);
+		}
+
+		if (match_found) {
+
+			dive_token_t token = lexer.get_last_token();
+
+			if (token.type == dive_token_type_t::INVALID_TOKEN) {
+
+				if (build_log != nullptr) {
+					// TODO: Put error in build log.
+				}
+
+				return divec_error_t::BUILD_ERROR;
+			}
+
+			std::cout << (int)(token.type) << '\n';
+
+			tokens.push_back(token);
+
+			// If we've processed the EOF token, then stop processing.
+			if (tokens.back().type == dive_token_type_t::EOF_TOKEN) { break; }
+
+			source_iter = program->source_code + token.end;
+			continue;
+		}
+
+		// keep this static if we're at the end, that way we can just keep pushing EOFs
+		// onto the thing until we get an EOF token.
+		// TODO: Think about more elegant ways to structure this function.
+		if (*source_iter != '\0') { source_iter++; }
+	}
+
+	// pop EOF token off of vector, we don't need that one for parsing.
+	tokens.pop_back();
+
+	const size_t tokens_size = tokens.size() * sizeof(dive_token_t);
+
+	program->tokens = (dive_token_t*)std::malloc(tokens_size);
+	if (program->tokens == nullptr) { return divec_error_t::OUT_OF_MEMORY; }
+
+	std::memcpy((dive_token_t*)program->tokens, tokens.data(), tokens_size);
+
+	program->tokens_length = tokens.size();
+
+	program->state = dive_program_state_t::LEXED;
+
+	return divec_error_t::SUCCESS;
+
 }
