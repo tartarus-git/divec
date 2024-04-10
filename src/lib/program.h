@@ -8,6 +8,7 @@
 enum class dive_program_state_t : uint8_t {
 	SOURCE,
 	LEXED,
+	PREPROCESSED,
 	PARSED,
 	DIVE_OPTIMIZED,
 	TRANSLATED,

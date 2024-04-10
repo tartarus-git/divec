@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
+
 // Size is very conservative because I don't want to have to break API
 // in the future if I add a bunch more tokens.
 // This enum might not end up in a user-facing position,
@@ -25,8 +28,8 @@ enum class dive_token_type_t : uint32_t {
 	FLOAT,
 	DOUBLE,
 	DECIMAL,
-	INT32_T,
-	INT64_T,
+	INT32,
+	INT64,
 	UINT32_T,
 	UINT64_T,
 	INT16_T,

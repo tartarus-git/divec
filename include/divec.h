@@ -1,6 +1,8 @@
 #ifndef LIBDIVEC_BINDINGS_HEADER_INCLUDED
 #define LIBDIVEC_BINDINGS_HEADER_INCLUDED
 
+#include <stdint.h>	// We have to use C-style headers here because this has to work in C and in C++.
+
 #ifdef __cplusplus
 extern "C" {
 #endif

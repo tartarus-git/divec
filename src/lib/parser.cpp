@@ -46,3 +46,8 @@ parser_t::parser_t(dive_program_t program, divec_error_t &err) noexcept {
 	tokens_head = program->tokens;
 	tokens_end = program->tokens + program->tokens_length;
 }
+
+divec_error_t diveParseProgram_inner(dive_program_t program, dive_build_log_t build_log) noexcept {
+	return divec_error_t::OUT_OF_MEMORY;
+	// TODO: implement this function.
+}

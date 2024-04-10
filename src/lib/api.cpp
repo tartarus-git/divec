@@ -1,7 +1,8 @@
-#include "program.h"
+#include "compiler_error.h"
 #include "lexer.h"
 #include "preprocessor.h"
 #include "parser.h"
+#include "compiler.h"
 
 #define LIB_EXPORT __attribute__((visibility("default")))
 

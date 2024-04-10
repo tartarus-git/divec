@@ -1,5 +1,11 @@
 #include "lexer.h"
 
+#include <vector>
+#include <cstring>
+
+// TODO: remove this later
+#include <iostream>
+
 extern "C" {
 	// These symbols are literally located at the start and end of the data.
 	// They don't have extra storage that contains pointers to the start and end of the data.
@@ -9,8 +15,8 @@ extern "C" {
 	extern lexer_dfa_table_row_t _binary_lexer_table_end;
 }
 
-const lexer_dfa_table_row_t *lexer_table_begin = _binary_lexer_table_start;
-const lexer_dfa_table_row_t *lexer_table_end = _binary_lexer_table_end;
+const lexer_dfa_table_row_t *lexer_table_begin = &_binary_lexer_table_start;
+const lexer_dfa_table_row_t *lexer_table_end = &_binary_lexer_table_end;
 
 bool lexer_t::push_inner(uint16_t character) noexcept {
 	const lexer_dfa_table_row_t &row = lexer_table_begin[current_row];
