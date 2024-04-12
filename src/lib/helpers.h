@@ -95,4 +95,9 @@ namespace helpers {
 		return divec_error_t::SUCCESS;
 	}
 
+	divec_error_t convert_size_t_to_string(size_t input, std::string &output) noexcept {
+		return divec_error_t::OUT_OF_MEMORY;
+		// TODO: implement
+	}
+
 }
