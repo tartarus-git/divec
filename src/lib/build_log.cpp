@@ -1,53 +1,54 @@
 #include "build_log.h"
 
-#include <cstring>
+#include <cstdlib>
 
-size_t diveGetBuildLogEntryStringSize_inner(dive_build_log_t build_log, void *entry) noexcept {
+dive_build_log_entry_t::dive_build_log_entry_t(dive_build_log_entry_type_t entry_type) noexcept
+: entry_type(entry_type)
+{ }
 
-	// Necessary to do it like this because of strict aliasing rules in C++.
-	// This is the only way to avoid UB when trying to do this.
-	dive_build_log_entry_type_t entry_type;
-	std::memcpy(&entry_type, entry, sizeof(entry_type));
-
-	switch (entry_type) {
-	case dive_build_log_entry_type_t::ERROR_UNEXPECTED_TOKEN:
-		return ((dive_build_error_unexpected_token_t*)entry)->get_string_size(build_log, entry);
-	default:
-		return -1;
-		// TODO: Make this throw back an error or something.
+divec_error_t dive_build_log_entry_t::base_free_children() noexcept {
+	if (next != nullptr) {
+		divec_error_t err = next->free_children();
+		if (err != divec_error_t::SUCCESS) { return err; }
+		std::free(next);
 	}
+}
+
+dive_build_log_t diveCreateBuildLog_inner(divec_error_t &err) noexcept {
+
+	err = divec_error_t::SUCCESS;
+
+	dive_build_log_t result = (dive_build_log_t)std::malloc(sizeof(dive_build_log_t_inner));
+	if (result == nullptr) {
+		err = divec_error_t::OUT_OF_MEMORY;
+		return nullptr;
+	}
+
+	result->entries = nullptr;
+
+	return result;
 
 }
 
-size_t diveGetBuildLogEntryString_inner(dive_build_log_t build_log,
-					void *entry,
+size_t diveGetBuildLogEntryStringSize_inner(dive_build_log_entry_t *entry, divec_error_t &err) noexcept {
+	return entry->get_string_size(err);
+}
+
+size_t diveGetBuildLogEntryString_inner(dive_build_log_entry_t *entry,
 					char *buffer,
 					size_t buffer_size,
 					divec_error_t &err) noexcept
 {
-
-	err = divec_error_t::SUCCESS;
-
-	// Same note as above.
-	dive_build_log_entry_type_t entry_type;
-	std::memcpy(&entry_type, entry, sizeof(entry_type));
-
-	switch (entry_type) {
-	case dive_build_log_entry_type_t::ERROR_UNEXPECTED_TOKEN:
-		return ((dive_build_error_unexpected_token_t*)entry)->get_string(build_log, entry, buffer, buffer_size, err);
-	default:
-		err = divec_error_t::INVALID_ARGUMENT;
-		return -1;
-	}
-
+	return entry->get_string(buffer, buffer_size, err);
 }
 
-size_t diveGetBuildLogStringSize_inner(dive_build_log_t build_log) noexcept {
+size_t diveGetBuildLogStringSize_inner(dive_build_log_t build_log, divec_error_t &err) noexcept {
 
 	size_t sum = 0;
 
-	for (void *entry = build_log->entries; entry != nullptr; entry = entry->next) {
-		sum += diveGetBuildLogEntryStringSize_inner(build_log, entry);
+	for (dive_build_log_entry_t *entry = build_log->entries; entry != nullptr; entry = entry->next) {
+		sum += diveGetBuildLogEntryStringSize_inner(entry, err);
+		if (err != divec_error_t::SUCCESS) { return -1; }
 	}
 
 	return sum;
@@ -64,9 +65,9 @@ size_t diveGetBuildLogString_inner(dive_build_log_t build_log,
 
 	size_t original_buffer_size = buffer_size;
 
-	for (void *entry = build_log->entries; entry != nullptr; entry = entry->next) {
+	for (dive_build_log_entry_t *entry = build_log->entries; entry != nullptr; entry = entry->next) {
 
-		size_t bytes_written = diveGetBuildLogEntryString_inner(build_log, entry, buffer, buffer_size, err);
+		size_t bytes_written = diveGetBuildLogEntryString_inner(entry, buffer, buffer_size, err);
 		if (err != divec_error_t::SUCCESS) { return -1; }
 
 		buffer += bytes_written;
@@ -75,5 +76,19 @@ size_t diveGetBuildLogString_inner(dive_build_log_t build_log,
 	}
 
 	return original_buffer_size - buffer_size;
+
+}
+
+divec_error_t diveReleaseBuildLog_inner(dive_build_log_t build_log) noexcept {
+
+	if (build_log->entries != nullptr) {
+		divec_error_t err = build_log->entries->free_children();
+		if (err != divec_error_t::SUCCESS) { return err; }
+		std::free(build_log->entries);
+	}
+
+	std::free(build_log);
+
+	return divec_error_t::SUCCESS;
 
 }

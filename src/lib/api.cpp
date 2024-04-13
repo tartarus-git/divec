@@ -3,6 +3,7 @@
 #include "preprocessor.h"
 #include "parser.h"
 #include "compiler.h"
+#include "build_log.h"
 
 #define LIB_EXPORT __attribute__((visibility("default")))
 
@@ -32,26 +33,29 @@ extern "C" {
 		return diveReleaseProgram_inner(program);
 	}
 
-	LIB_EXPORT dive_build_log_t diveCreateBuildLog() noexcept {
-		return diveCreateBuildLog_inner();
+	LIB_EXPORT dive_build_log_t diveCreateBuildLog(divec_error_t *err) noexcept {
+		// forwarding err through a reference
+		return diveCreateBuildLog_inner(*err);
 	}
 
-	LIB_EXPORT size_t diveGetBuildLogEntryStringSize(dive_build_log_t build_log, void *entry) noexcept {
-		return diveGetBuildLogEntryStringSize_inner(build_log, entry);
+	// TODO: Replace the entry pointer with an opaque pointer alias type, like you did with dive_build_log_t. Use that in build_log code files as well.
+	LIB_EXPORT size_t diveGetBuildLogEntryStringSize(dive_build_log_entry_t *entry, divec_error_t *err) noexcept {
+		// forwarding err through a reference
+		return diveGetBuildLogEntryStringSize_inner(entry, *err);
 	}
 
-	LIB_EXPORT size_t diveGetBuildLogEntryString(dive_build_log_t build_log,
-						  void *entry,
-						  char *buffer,
-						  size_t buffer_size,
-						  divec_error_t *err) noexcept
+	LIB_EXPORT size_t diveGetBuildLogEntryString(dive_build_log_entry_t *entry,
+						     char *buffer,
+						     size_t buffer_size,
+						     divec_error_t *err) noexcept
 	{
 		// forwarding err through a reference
-		return diveBuildLogEntryString_inner(build_log, entry, buffer, buffer_size, *err);
+		return diveGetBuildLogEntryString_inner(entry, buffer, buffer_size, *err);
 	}
 
-	LIB_EXPORT size_t diveGetBuildLogStringSize(dive_build_log_t build_log) noexcept {
-		return diveGetBuildLogStringSize_inner(build_log);
+	LIB_EXPORT size_t diveGetBuildLogStringSize(dive_build_log_t build_log, divec_error_t *err) noexcept {
+		// forwarding err through a reference
+		return diveGetBuildLogStringSize_inner(build_log, *err);
 	}
 
 	LIB_EXPORT size_t diveGetBuildLogString(dive_build_log_t build_log, char *buffer, size_t buffer_size, divec_error_t *err) noexcept {
@@ -59,8 +63,8 @@ extern "C" {
 		return diveGetBuildLogString_inner(build_log, buffer, buffer_size, *err);
 	}
 
-	LIB_EXPORT divec_error_t diveReleaseBuildLog() noexcept {
-		return diveReleaseBuildLog_inner();
+	LIB_EXPORT divec_error_t diveReleaseBuildLog(dive_build_log_t build_log) noexcept {
+		return diveReleaseBuildLog_inner(build_log);
 	}
 
 }

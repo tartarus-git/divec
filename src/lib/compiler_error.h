@@ -11,6 +11,7 @@ enum class divec_error_t : uint32_t {
 	OUT_OF_MEMORY,
 	ALREADY_DONE,
 	OBJECT_NOT_READY,
+	BUFFER_TOO_SMALL,
 	BUILD_ERROR,
 	// Even if the next two end up not being used in the dynamic lib code, keep them,
 	// to make sure error codes between static and dynamic lib don't get unsynchronized.

@@ -80,13 +80,4 @@ struct dive_token_t {
 	size_t end;
 };
 
-const char* get_dive_token_type_string(dive_token_type_t token_type) noexcept {
-
-	switch (token_type) {
-		case dive_token_type_t::INT32: return "<base_type>";
-		case dive_token_type_t::ASTERSIK: return "*";
-		// TODO: etc...
-		// TODO: Don't forget about the function in helpers.h that needs to be implemented.
-	}
-
-}
+const char* get_dive_token_type_string(dive_token_type_t token_type) noexcept;
