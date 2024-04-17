@@ -16,5 +16,6 @@ enum class divec_error_t : uint32_t {
 	// Even if the next two end up not being used in the dynamic lib code, keep them,
 	// to make sure error codes between static and dynamic lib don't get unsynchronized.
 	GENERAL_FAILURE,
-	CATASTROPHIC_FAILURE	// for meaning of this error code, check divec.h header.
+	CATASTROPHIC_FAILURE,	// for meaning of this error code, check divec.h header.
+	BUG			// same for this one
 };

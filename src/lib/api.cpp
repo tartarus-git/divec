@@ -38,10 +38,29 @@ extern "C" {
 		return diveCreateBuildLog_inner(*err);
 	}
 
+	LIB_EXPORT const void* diveGetBuildLogEntryContents(dive_build_log_entry_t entry, divec_error_t *err) noexcept {
+		// forwarding err through a reference
+		return diveGetBuildLogEntryContents_inner(entry, *err);
+	}
+
+	LIB_EXPORT dive_build_log_entry_type_t diveGetBuildLogEntryType(dive_build_log_entry_t entry, divec_error_t *err) noexcept {
+		// forwarding err through a reference
+		return diveGetBuildLogEntryType_inner(entry, *err);
+	}
+
+	// TODO: Should probably change the string functions so they give you a pointer to the in-build-log-string instead of copying it out, right?
+	// Actually, there is an argument not to, because you're supposed to be able to change the entry contents, but you're not supposed to be
+	// able to change the string. Hence the string can be returned like that, and the entry contents has to be returned as a pointer.
+
 	LIB_EXPORT size_t diveGetBuildLogEntryStringSize(dive_build_log_entry_t entry, divec_error_t *err) noexcept {
 		// forwarding err through a reference
 		return diveGetBuildLogEntryStringSize_inner(entry, *err);
 	}
+
+	// TODO: You gotta find a solution for the problem of changing the entry and then getting the old string instead of the new one that should be generated.
+	// FIX: Simple fix would be to destroy the string cache at the end of the GetString functions. That way, what you need it for is done properly,
+	// but it's not kept in between successive calls of GetString, which is fine I guess. I mean why would you call it successively without caching it yourself
+	// in any case but the one where it has changed anyway and it should be regenerated?
 
 	LIB_EXPORT size_t diveGetBuildLogEntryString(dive_build_log_entry_t entry,
 						     char *buffer,

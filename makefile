@@ -42,6 +42,7 @@ bin/libdivec_so_build/parser_impl/program.o \
 bin/libdivec_so_build/parser_impl/function.o \
 bin/libdivec_so_build/parser_impl/statement.o \
 bin/libdivec_so_build/build_log.o \
+bin/libdivec_so_build/build_log_impl/invalid_token.o \
 bin/libdivec_so_build/build_log_impl/unexpected_token.o \
 bin/libdivec_so_build/helpers.o
 
@@ -169,6 +170,12 @@ include .make_temp_file
 bin/libdivec_so_build/build_log.o: bin/libdivec_so_build/.dirstamp
 	$(EMIT_ASSEMBLY_PREAMBLE) src/lib/build_log.cpp -o bin/libdivec_so_build/build_log.asm
 	$(COMPILER_PREAMBLE) -fPIC -c src/lib/build_log.cpp -o bin/libdivec_so_build/build_log.o
+
+$(shell $(HEADER_FINDER_PREAMBLE) -MM src/lib/build_log_impl/invalid_token.cpp | aprepend --front bin/libdivec_so_build/ > .make_temp_file)
+include .make_temp_file
+bin/libdivec_so_build/build_log_impl/invalid_token.o: bin/libdivec_so_build/build_log_impl/.dirstamp
+	$(EMIT_ASSEMBLY_PREAMBLE) src/lib/build_log_impl/invalid_token.cpp -o bin/libdivec_so_build/build_log_impl/invalid_token.asm
+	$(COMPILER_PREAMBLE) -fPIC -c src/lib/build_log_impl/invalid_token.cpp -o bin/libdivec_so_build/build_log_impl/invalid_token.o
 
 $(shell $(HEADER_FINDER_PREAMBLE) -MM src/lib/build_log_impl/unexpected_token.cpp | aprepend --front bin/libdivec_so_build/ > .make_temp_file)
 include .make_temp_file

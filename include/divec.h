@@ -16,8 +16,10 @@ extern "C" {
 		DIVEC_BUFFER_TOO_SMALL,
 		DIVEC_BUILD_ERROR,
 		DIVEC_GENERAL_FAILURE,
-		DIVEC_CATASTROPHIC_FAILURE	// Used for when the best option is for program to kill itself.
+		DIVEC_CATASTROPHIC_FAILURE,	// Used for when the best option is for program to kill itself.
 						// Used (for example) when the program state is corrupted.
+		BUG			// Used when the library is able to recognize that it contains a bug.
+					// Only thing handler can reasonably do here is terminate program, after which you can post an issue on the library GitHub.
 	};
 
 	typedef struct dive_build_log_t_inner* dive_build_log_t;

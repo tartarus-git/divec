@@ -12,7 +12,10 @@ divec_error_t dive_build_log_entry_t_inner::base_free_children() noexcept {
 		if (err != divec_error_t::SUCCESS) { return err; }
 		std::free(next);
 	}
+	return divec_error_t::SUCCESS;
 }
+
+// USER-FACING FUNCTIONS
 
 dive_build_log_t diveCreateBuildLog_inner(divec_error_t &err) noexcept {
 
@@ -24,10 +27,28 @@ dive_build_log_t diveCreateBuildLog_inner(divec_error_t &err) noexcept {
 		return nullptr;
 	}
 
-	result->entries = nullptr;
+	*result = {
+		.entries = nullptr,
+		.last_entry = nullptr
+	};
 
 	return result;
 
+}
+
+dive_build_log_entry_t diveGetNextBuildLogEntry_inner(dive_build_log_entry_t entry, divec_error_t &err) noexcept {
+	err = divec_error_t::SUCCESS;
+	return entry->next;
+}
+
+dive_build_log_entry_type_t diveGetBuildLogEntryType_inner(dive_build_log_entry_t entry, divec_error_t &err) noexcept {
+	err = divec_error_t::SUCCESS;
+	return entry->entry_type;
+}
+
+void* diveGetBuildLogEntryContents_inner(dive_build_log_entry_t entry, divec_error_t &err) noexcept {
+	err = divec_error_t::SUCCESS;
+	return entry->get_user_accessible_data_ptr();
 }
 
 size_t diveGetBuildLogEntryStringSize_inner(dive_build_log_entry_t entry, divec_error_t &err) noexcept {
@@ -88,6 +109,26 @@ divec_error_t diveReleaseBuildLog_inner(dive_build_log_t build_log) noexcept {
 	}
 
 	std::free(build_log);
+
+	return divec_error_t::SUCCESS;
+
+}
+
+// BACKEND FUNCTIONS
+
+divec_error_t link_entry_to_build_log(dive_build_log_t build_log, dive_build_log_entry_t entry) noexcept {
+
+	if (build_log->last_entry == nullptr) {
+		if (build_log->entries != nullptr) { return divec_error_t::BUG; }
+
+		build_log->entries = build_log->last_entry = entry;
+		return divec_error_t::SUCCESS;
+	}
+
+	if (build_log->last_entry->next != nullptr) { return divec_error_t::BUG; }
+
+	build_log->last_entry->next = entry;
+	build_log->last_entry = build_log->last_entry->next;
 
 	return divec_error_t::SUCCESS;
 
