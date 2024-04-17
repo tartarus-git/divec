@@ -10,13 +10,16 @@ enum class dive_build_log_entry_type_t {
 	ERROR_UNEXPECTED_TOKEN
 };
 
-class dive_build_log_entry_t {
+class dive_build_log_entry_t_inner;
+using dive_build_log_entry_t = dive_build_log_entry_t_inner*;
+
+class dive_build_log_entry_t_inner {
 public:
 	dive_build_log_entry_type_t entry_type = dive_build_log_entry_type_t::NULL_ENTRY;
 
-	dive_build_log_entry_t *next = nullptr;
+	dive_build_log_entry_t next = nullptr;
 
-	dive_build_log_entry_t(dive_build_log_entry_type_t entry_type) noexcept;
+	dive_build_log_entry_t_inner(dive_build_log_entry_type_t entry_type) noexcept;
 
 	virtual void* get_user_accessible_data_ptr() noexcept = 0;
 
@@ -30,7 +33,7 @@ public:
 };
 
 struct dive_build_log_t_inner {
-	dive_build_log_entry_t *entries;
+	dive_build_log_entry_t entries;
 };
 
 using dive_build_log_t = dive_build_log_t_inner*;
@@ -40,9 +43,9 @@ using dive_build_log_t = dive_build_log_t_inner*;
 
 dive_build_log_t diveCreateBuildLog_inner(divec_error_t &err) noexcept;
 
-size_t diveGetBuildLogEntryStringSize_inner(dive_build_log_entry_t *entry, divec_error_t &err) noexcept;
+size_t diveGetBuildLogEntryStringSize_inner(dive_build_log_entry_t entry, divec_error_t &err) noexcept;
 
-size_t diveGetBuildLogEntryString_inner(dive_build_log_entry_t *entry,
+size_t diveGetBuildLogEntryString_inner(dive_build_log_entry_t entry,
 					char *buffer,
 					size_t buffer_size,
 					divec_error_t &err) noexcept;

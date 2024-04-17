@@ -38,13 +38,12 @@ extern "C" {
 		return diveCreateBuildLog_inner(*err);
 	}
 
-	// TODO: Replace the entry pointer with an opaque pointer alias type, like you did with dive_build_log_t. Use that in build_log code files as well.
-	LIB_EXPORT size_t diveGetBuildLogEntryStringSize(dive_build_log_entry_t *entry, divec_error_t *err) noexcept {
+	LIB_EXPORT size_t diveGetBuildLogEntryStringSize(dive_build_log_entry_t entry, divec_error_t *err) noexcept {
 		// forwarding err through a reference
 		return diveGetBuildLogEntryStringSize_inner(entry, *err);
 	}
 
-	LIB_EXPORT size_t diveGetBuildLogEntryString(dive_build_log_entry_t *entry,
+	LIB_EXPORT size_t diveGetBuildLogEntryString(dive_build_log_entry_t entry,
 						     char *buffer,
 						     size_t buffer_size,
 						     divec_error_t *err) noexcept

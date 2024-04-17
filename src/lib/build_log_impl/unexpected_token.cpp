@@ -7,7 +7,7 @@
 #include "helpers.h"
 
 dive_build_error_unexpected_token_t::dive_build_error_unexpected_token_t() noexcept
-: dive_build_log_entry_t(dive_build_log_entry_type_t::ERROR_UNEXPECTED_TOKEN)
+: dive_build_log_entry_t_inner(dive_build_log_entry_type_t::ERROR_UNEXPECTED_TOKEN)
 {
 	user_accessible.string_representation = nullptr;
 }
