@@ -1,7 +1,11 @@
 #include "lexer.h"
 
-#include <vector>
+#include <cstdlib>
+#include <new>
 #include <cstring>
+#include <vector>
+
+#include "helpers.h"
 
 // TODO: remove this later
 #include <iostream>
@@ -101,7 +105,33 @@ divec_error_t diveLexProgram_inner(dive_program_t program, dive_build_log_t buil
 			if (token.type == dive_token_type_t::INVALID_TOKEN) {
 
 				if (build_log != nullptr) {
-					// TODO: Put error in build log.
+					dive_build_error_invalid_token_t *entry = (dive_build_error_invalid_token_t*)std::malloc(sizeof(dive_build_error_invalid_token_t));
+					if (entry == nullptr) { return divec_error_t::OUT_OF_MEMORY; }
+
+					const auto [source_code_line, source_code_column] = helpers::get_line_column_from_text_position(program->source_code, token.begin);
+					if (source_code_line == -1) {
+						// It's probably worthwhile not to touch heap state when bug happens for debugging purposes.
+						// So we're not going to free entry here. Memory leak. The user should terminate the program anyway so it's fine.
+						if (source_code_column != -1) { return divec_error_t::BUG; }
+						return divec_error_t::BUG;
+					}
+
+					divec_error_t err;
+					new (entry) dive_build_error_invalid_token_t(source_code_line,
+									       source_code_column,
+									       program->source_code + token.begin,
+									       (source_iter - program->source_code) + 1 - token.begin,
+									       err);
+					if (err != divec_error_t::SUCCESS) {
+						std::free(entry);
+						return err;
+					}
+
+					err = link_entry_to_build_log(build_log, entry);
+					if (err != divec_error_t::SUCCESS) {
+						std::free(entry);
+						return err;
+					}
 				}
 
 				return divec_error_t::BUILD_ERROR;

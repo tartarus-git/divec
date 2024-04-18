@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <new>
 #include <string>
+#include <tuple>
 
 #include "compiler_error.h"
 
@@ -97,5 +98,7 @@ namespace helpers {
 	}
 
 	divec_error_t convert_size_t_to_string(size_t input, std::string &output) noexcept;
+
+	std::tuple<size_t, size_t> get_line_column_from_text_position(const char *text, size_t position) noexcept;
 
 }

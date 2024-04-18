@@ -29,6 +29,10 @@ extern "C" {
 	divec_error_t diveCompileProgram(dive_program_t program, dive_build_log_t build_log);
 	divec_error_t diveReleaseProgram(dive_program_t program);
 
+	dive_build_log_t diveCreateBuildLog(divec_error_t *err);
+	size_t diveGetBuildLogStringSize(dive_build_log_t build_log, divec_error_t *err);
+	size_t diveGetBuildLogString(dive_build_log_t build_log, char *buffer, size_t buffer_size, divec_error_t *err);
+
 #ifdef __cplusplus
 }
 #endif

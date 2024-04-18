@@ -6,7 +6,7 @@
 // This will be included from build_log.h to create one big header file with all the different specializations.
 // So dive_build_log_t and whatever we need will be available here, even if it doesn't look like it.
 
-class dive_build_error_invalid_token_t : dive_build_log_entry_t_inner {
+class dive_build_error_invalid_token_t : public dive_build_log_entry_t_inner {
 public:
 	struct {
 		size_t source_code_line;
@@ -21,7 +21,7 @@ public:
 	dive_build_error_invalid_token_t(size_t source_code_line,
 					 size_t source_code_column,
 					 const char *invalid_token_text,
-					 size_t invalid_token_text_size,
+					 size_t invalid_token_text_length,
 					 divec_error_t &err) noexcept;
 
 private:

@@ -57,11 +57,6 @@ extern "C" {
 		return diveGetBuildLogEntryStringSize_inner(entry, *err);
 	}
 
-	// TODO: You gotta find a solution for the problem of changing the entry and then getting the old string instead of the new one that should be generated.
-	// FIX: Simple fix would be to destroy the string cache at the end of the GetString functions. That way, what you need it for is done properly,
-	// but it's not kept in between successive calls of GetString, which is fine I guess. I mean why would you call it successively without caching it yourself
-	// in any case but the one where it has changed anyway and it should be regenerated?
-
 	LIB_EXPORT size_t diveGetBuildLogEntryString(dive_build_log_entry_t entry,
 						     char *buffer,
 						     size_t buffer_size,
