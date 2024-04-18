@@ -59,6 +59,16 @@ void* dive_build_error_invalid_token_t::get_user_accessible_data_ptr() noexcept 
 	return &user_accessible;
 }
 
+divec_error_t dive_build_error_invalid_token_t::invalidate_string() noexcept {
+
+	std::free((char*)string_representation);
+	string_representation = nullptr;
+	string_representation_size = 0;
+
+	return divec_error_t::SUCCESS;
+
+}
+
 size_t dive_build_error_invalid_token_t::get_string_size(divec_error_t &err) noexcept {
 
 	err = divec_error_t::SUCCESS;

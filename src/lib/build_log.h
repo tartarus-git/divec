@@ -24,6 +24,8 @@ public:
 
 	virtual void* get_user_accessible_data_ptr() noexcept = 0;
 
+	virtual divec_error_t invalidate_string() noexcept = 0;
+
 	virtual size_t get_string_size(divec_error_t &err) noexcept = 0;
 	virtual size_t get_string(char *buffer,
 				  size_t buffer_size,
@@ -40,8 +42,8 @@ struct dive_build_log_t_inner {
 
 using dive_build_log_t = dive_build_log_t_inner*;
 
-#include "build_log_impl/unexpected_token.h"
 #include "build_log_impl/invalid_token.h"
+#include "build_log_impl/unexpected_token.h"
 
 // USER-FACING FUNCTIONS
 

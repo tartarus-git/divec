@@ -6,15 +6,33 @@
 
 #include "helpers.h"
 
-dive_build_error_unexpected_token_t::dive_build_error_unexpected_token_t() noexcept
+dive_build_error_unexpected_token_t::dive_build_error_unexpected_token_t(size_t source_code_line,
+									 size_t source_code_column,
+									 const char *token_text,
+									 size_t token_text_length,
+									 dive_token_type_t *expected_token_types,
+									 size_t expected_token_types_length,
+									 divec_error_t &err) noexcept
 : dive_build_log_entry_t_inner(dive_build_log_entry_type_t::ERROR_UNEXPECTED_TOKEN)
 {
-	user_accessible.string_representation = nullptr;
+	err = divec_error_t::SUCCESS;
+
+	user_accessible.source_code_line = source_code_line;
+	user_accessible.source_code_column = source_code_column;
+
+	user_accessible.token_text = (const char*)std::malloc((token_text_length + 1) * sizeof(char));
+	if (user_accessible.token_text == nullptr) { err = divec_error_t::OUT_OF_MEMORY; return; }
+
+	std::memcpy((char*)user_accessible.token_text, token_text, token_text_length * sizeof(char));
+	((char*)(user_accessible.token_text))[token_text_length] = '\0';
+
+	user_accessible.expected_token_types = expected_token_types;
+	user_accessible.expected_token_types_length = expected_token_types_length;
 }
 
 divec_error_t dive_build_error_unexpected_token_t::gen_string_representation() noexcept {
 
-	if (user_accessible.string_representation != nullptr) { return divec_error_t::SUCCESS; }
+	if (string_representation != nullptr) { return divec_error_t::SUCCESS; }
 
 	std::string result;
 
@@ -41,12 +59,12 @@ divec_error_t dive_build_error_unexpected_token_t::gen_string_representation() n
 
 	result += '\n';
 
-	user_accessible.string_representation_size = result.length() * sizeof(char);
+	string_representation_size = result.length() * sizeof(char);
 
-	user_accessible.string_representation = (const char*)std::malloc(user_accessible.string_representation_size);
-	if (user_accessible.string_representation == nullptr) { return divec_error_t::OUT_OF_MEMORY; }
+	string_representation = (const char*)std::malloc(string_representation_size);
+	if (string_representation == nullptr) { return divec_error_t::OUT_OF_MEMORY; }
 
-	std::memcpy((char*)(user_accessible.string_representation), result.c_str(), user_accessible.string_representation_size * sizeof(char));
+	std::memcpy((char*)(string_representation), result.c_str(), string_representation_size * sizeof(char));
 
 	return divec_error_t::SUCCESS;
 
@@ -56,6 +74,16 @@ void* dive_build_error_unexpected_token_t::get_user_accessible_data_ptr() noexce
 	return &user_accessible;
 }
 
+divec_error_t dive_build_error_unexpected_token_t::invalidate_string() noexcept {
+
+	std::free((char*)string_representation);
+	string_representation = nullptr;
+	string_representation_size = 0;
+
+	return divec_error_t::SUCCESS;
+
+}
+
 size_t dive_build_error_unexpected_token_t::get_string_size(divec_error_t &err) noexcept {
 
 	err = divec_error_t::SUCCESS;
@@ -63,7 +91,7 @@ size_t dive_build_error_unexpected_token_t::get_string_size(divec_error_t &err) 
 	err = gen_string_representation();
 	if (err != divec_error_t::SUCCESS) { return -1; }
 
-	return user_accessible.string_representation_size;
+	return string_representation_size;
 
 }
 
@@ -77,14 +105,14 @@ size_t dive_build_error_unexpected_token_t::get_string(char *buffer,
 	err = gen_string_representation();
 	if (err != divec_error_t::SUCCESS) { return -1; }
 
-	if (buffer_size < user_accessible.string_representation_size) {
+	if (buffer_size < string_representation_size) {
 		err = divec_error_t::BUFFER_TOO_SMALL;
 		return -1;
 	}
 
-	std::memcpy(buffer, user_accessible.string_representation, user_accessible.string_representation_size);
+	std::memcpy(buffer, string_representation, string_representation_size);
 
-	return user_accessible.string_representation_size;
+	return string_representation_size;
 
 }
 
@@ -92,7 +120,7 @@ divec_error_t dive_build_error_unexpected_token_t::free_children() noexcept {
 
 	std::free((char*)user_accessible.token_text);
 	std::free((dive_token_type_t*)user_accessible.expected_token_types);
-	std::free((char*)user_accessible.string_representation);
+	std::free((char*)string_representation);
 
 	divec_error_t err = base_free_children();
 	if (err != divec_error_t::SUCCESS) { return divec_error_t::CATASTROPHIC_FAILURE; }

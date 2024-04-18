@@ -18,18 +18,26 @@ public:
 
 		const dive_token_type_t *expected_token_types;
 		size_t expected_token_types_length;
-
-		const char *string_representation;
-		size_t string_representation_size;
 	} user_accessible;
 
-	dive_build_error_unexpected_token_t() noexcept;
+	const char *string_representation = nullptr;
+	size_t string_representation_size = 0;
+
+	dive_build_error_unexpected_token_t(size_t source_code_line,
+					    size_t source_code_column,
+					    const char *token_text,
+					    size_t token_text_length,
+					    dive_token_type_t *expected_token_types,
+					    size_t expected_token_types_length,
+					    divec_error_t &err) noexcept;
 
 private:
 	divec_error_t gen_string_representation() noexcept;
 
 public:
 	void* get_user_accessible_data_ptr() noexcept override final;
+
+	divec_error_t invalidate_string() noexcept override final;
 
 	size_t get_string_size(divec_error_t &err) noexcept override final;
 	size_t get_string(char *buffer, size_t buffer_size, divec_error_t &err) noexcept override final;

@@ -30,6 +30,8 @@ private:
 public:
 	void* get_user_accessible_data_ptr() noexcept override final;
 
+	divec_error_t invalidate_string() noexcept override final;
+
 	size_t get_string_size(divec_error_t &err) noexcept override final;
 	size_t get_string(char *buffer, size_t buffer_size, divec_error_t &err) noexcept override final;
 
