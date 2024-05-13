@@ -25,6 +25,10 @@ bool superpositions_equal(const std::vector<size_t> &a, const std::vector<size_t
 		if (hit == false) { return false; }
 	}
 
+	// TODO: Is the following condition redundant given the first condition? Of course it is,
+	// but I mean in this specific implementation. I don't know where we filter out duplicates here anymore.
+	// This could've been done on purpose.
+
 	// the other one has to be contained within the former
 	for (const size_t &state : b) {
 		bool hit = false;
@@ -133,13 +137,22 @@ size_t shape_edges(dfa_table_t &dfa_table,
 
 	size_t terminator_id = -1;
 
+	ssize_t highest_priority_thus_far = -1;
+
 	// NOTE: ssize_t is needed because or else i-- can cause a bug to happen
 	// where some things are ignored in the state_superposition vector.
+	// I probably meant integer underflow when I wrote that note.
 	for (ssize_t i = 0; i < state_superposition.size(); i++) {
 		const size_t &state = state_superposition[i];
 		if (is_ghost_row(nfa_table, state)) {
 			if (nfa_table.rows[state].children.empty()) {
-				terminator_id = nfa_table.rows[state].token_id;
+
+				if ((ssize_t)(nfa_table.rows[state].priority) > highest_priority_thus_far) {
+
+					terminator_id = nfa_table.rows[state].token_id;
+					highest_priority_thus_far = nfa_table.rows[state].priority;
+
+				}
 				state_superposition.erase(state_superposition.begin() + i);
 				i--;
 				continue;

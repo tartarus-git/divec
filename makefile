@@ -46,6 +46,12 @@ bin/libdivec_so_build/build_log_impl/invalid_token.o \
 bin/libdivec_so_build/build_log_impl/unexpected_token.o \
 bin/libdivec_so_build/helpers.o
 
+# If debug build mode is active, include the debug code in the build process.
+DEBUG_BUILD := 0
+ifeq ($(DEBUG_BUILD),1)
+libdivec_so_objects := $(libdivec_so_objects) bin/libdivec_so_build/debug.o
+endif
+
 bin/libdivec.so: bin/.dirstamp $(libdivec_so_objects)
 	$(COMPILER_PREAMBLE) -shared -fvisibility=hidden $(libdivec_so_objects) -o bin/libdivec.so
 
@@ -190,6 +196,12 @@ include .make_temp_file
 bin/libdivec_so_build/helpers.o: bin/libdivec_so_build/.dirstamp
 	$(EMIT_ASSEMBLY_PREAMBLE) src/lib/helpers.cpp -o bin/libdivec_so_build/helpers.asm
 	$(COMPILER_PREAMBLE) -fPIC -c src/lib/helpers.cpp -o bin/libdivec_so_build/helpers.o
+
+$(shell $(HEADER_FINDER_PREAMBLE) -MM src/lib/debug.cpp | aprepend --front bin/libdivec_so_build/ > .make_temp_file)
+include .make_temp_file
+bin/libdivec_so_build/debug.o: bin/libdivec_so_build/.dirstamp
+	$(EMIT_ASSEMBLY_PREAMBLE) src/lib/debug.cpp -o bin/libdivec_so_build/debug.asm
+	$(COMPILER_PREAMBLE) -fPIC -c src/lib/debug.cpp -o bin/libdivec_so_build/debug.o
 
 # ----- libdivec END -----
 

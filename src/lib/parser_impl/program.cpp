@@ -43,7 +43,10 @@ dive_ast_program_t* parser_t::parse_program(dive_build_log_t build_log, divec_er
 
 		std::cout << "Finished parsing function!\n";
 
-		if (peek_token(0).type == dive_token_type_t::EOF_TOKEN) { break; }
+		if (peek_token(0).type == dive_token_type_t::EOF_TOKEN) {
+			get_next_token();		// take EOF off of the token list, thereby emptying it (if it was filled correctly)
+			break;
+		}
 	}
 
 	return result;

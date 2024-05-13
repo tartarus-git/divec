@@ -4,7 +4,7 @@
 #include "divec.h"
 
 constexpr char test_source_code[] = R"(
-int32_t test = 1; %
+int32_t func1(){int32_t}
 )";
 
 void outputBuildLog(dive_build_log_t build_log) noexcept {

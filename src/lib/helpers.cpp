@@ -17,6 +17,11 @@ namespace helpers {
 	}
 
 	std::tuple<size_t, size_t> get_line_column_from_text_position(const char *text, size_t position) noexcept {
+
+		// TODO: This function needs to be expanded to deal with all the invisible characters.
+		// TODO: Also check that the line and column outputs are still valid when you query the position of
+		// the newline character itself or something like that.
+
 		size_t line = 1;
 		size_t column = 1;
 

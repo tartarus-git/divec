@@ -9,6 +9,8 @@ divec_error_t dive_ast_program_t::init() noexcept {
 	// TODO: You should probably set the array to nullptr, because the ast is user-facing
 	// and the user will expect you to do that.
 	// Same for function.cpp
+	// TODO: New rule is to set everything to default values in here. Fix that, do that for everything.
+	// It's the better approach.
 	functions_length = 0;
 	functions_capacity = 0;
 

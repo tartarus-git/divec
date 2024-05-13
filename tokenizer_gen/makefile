@@ -1,6 +1,6 @@
 CPP_COMPILER := clang++-16
 
-CPP_COMP_PREAMBLE := $(CPP_COMPILER) -Wall -Wextra
+CPP_COMP_PREAMBLE := $(CPP_COMPILER) --std=c++20 -Wall -Wextra
 
 .PHONY: all build clean
 

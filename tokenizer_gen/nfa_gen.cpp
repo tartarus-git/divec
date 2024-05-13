@@ -105,13 +105,14 @@ void shape_row(nfa_table_t &nfa_table, size_t row, const bool (&row_filter)[256]
 	}
 }
 
-void add_nfa_rows_for_regex(nfa_table_t &nfa_table, size_t token_id, const std::string &regex) noexcept {
+void add_nfa_rows_for_regex(nfa_table_t &nfa_table, size_t token_id, const std::string &regex, size_t priority) noexcept {
 	std::vector<size_t> ghost_row_source_stack;
 	ghost_row_source_stack.push_back(0);
 
 	std::vector<size_t> ghost_row_destination_stack;
 	size_t ending_ghost_row = allocate_ghost_row(nfa_table);
 	nfa_table.rows[ending_ghost_row].token_id = token_id;
+	nfa_table.rows[ending_ghost_row].priority = priority;
 	ghost_row_destination_stack.push_back(ending_ghost_row);
 
 	size_t last_row = allocate_nfa_row(nfa_table, { false, { } });
@@ -195,6 +196,7 @@ void add_nfa_rows_for_regex(nfa_table_t &nfa_table, size_t token_id, const std::
 void add_eof_mechanism(nfa_table_t &table, size_t token_id) noexcept {
 	size_t eof_state = allocate_ghost_row(table);
 	table.rows[eof_state].token_id = token_id;
+	table.rows[eof_state].priority = 0;
 
 	nfa_row_t eof_filter = { false, { } };
 	eof_filter.elements[256].next = eof_state;
@@ -211,16 +213,24 @@ nfa_table_t gen_nfa(const std::string &specification) noexcept {
 
 	add_eof_mechanism(result, 0);
 
+	size_t next_token_id = 1;
+	std::vector<std::tuple<size_t, std::string, size_t>> spec_list;
+
 	for (const std::string &line : lines) {
 		if (line.empty()) { continue; }
+		if (line.starts_with('#')) { continue; }	// comments
 
 		std::vector<std::string> parts = split(line, "->");
 
-		size_t token_id = std::atoi(parts[0].c_str()) + 1;
+		size_t priority = std::atoi(parts[0].c_str());
 		const std::string &regex = parts[1];
-		std::cout << token_id << ", " << regex << '\n';
+		std::cout << priority << ", " << regex << '\n';
 
-		add_nfa_rows_for_regex(result, token_id, regex);
+		spec_list.push_back({ next_token_id++, regex, priority });
+	}
+
+	for (const auto &[token_id, regex, priority] : spec_list) {
+		add_nfa_rows_for_regex(result, token_id, regex, priority);
 	}
 
 	return result;

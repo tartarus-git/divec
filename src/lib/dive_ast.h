@@ -11,6 +11,7 @@
 // they don't cross the API boundary.
 
 enum class dive_ast_base_type_t {
+	UNINITIALIZED,
 	INT32,
 	INT64
 };
@@ -59,6 +60,10 @@ struct dive_ast_function_t {
 };
 
 struct dive_ast_program_t {
+	// TODO: Should this really be an array of pointers?
+	// Doesn't really make sense does it?
+	// I mean they're not super duper big.
+	// But maybe for the future it's a good idea, is it?
 	dive_ast_function_t **functions;
 	size_t functions_length;
 	size_t functions_capacity;

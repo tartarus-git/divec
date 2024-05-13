@@ -1,73 +1,75 @@
+# 0 is token id of EOF token
+
 0->( |\t|\0)( |\t|\0)*
 1->if
-2->while
-3->for
-4->\(
-5->\)
-6->\[
-7->\]
-8->\.
-9->{
-10->}
+1->while
+1->for
+0->\(
+0->\)
+0->\[
+0->\]
+0->\.
+0->{
+0->}
 
-11->float
-12->double
-13->decimal
+1->float
+1->double
+1->decimal
 
-14->int32_t
-15->int64_t
-16->uint32_t
-17->uint64_t
-18->int16_t
-19->uint16_t
-20->int8_t
-21->uint8_t
+1->int32_t
+1->int64_t
+1->uint32_t
+1->uint64_t
+1->int16_t
+1->uint16_t
+1->int8_t
+1->uint8_t
 
-22->\n(\n)*
+0->\n(\n)*
 
-23->;
-24->,
+0->;
+0->,
 
-25->(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|_)(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|_|0|1|2|3|4|5|6|7|8|9)*
+0->(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|_)(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|_|0|1|2|3|4|5|6|7|8|9)*
 
-26->+
-27->-
-28->/
-29->\*
+0->+
+0->-
+0->/
+0->\*
 
-30-><
-31->>
-32-><<
-33->>>
+0-><
+0->>
+0-><<
+0->>>
 
-34->=
-35->==
+0->=
+0->==
 
-36->+=
-37->-=
-38->/=
-39->\*=
-40->>>=
-41-><<=
+0->+=
+0->-=
+0->/=
+0->\*=
+0->>>=
+0-><<=
 
-42->&
-43->\|
-44->^
-45->~
+0->&
+0->\|
+0->^
+0->~
 
-46->&&
-47->\|\|
-48->!
+0->&&
+0->\|\|
+0->!
 
-49->!=
-50->>=
-51-><=
+0->!=
+0->>=
+0-><=
 
-52->\\
+0->\\
 
-53->"TODO: implement string, start with everything that's not a quotation mark I guess"
-54->'' TODO: same thing, but slightly different and with only one character or an escape code inside the single quotes
+0->"TODO: implement string, start with everything that's not a quotation mark I guess"
+0->'' TODO: same thing, but slightly different and with only one character or an escape code inside the single quotes
 
-55->void
+1->void
 
-56->(1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*
+0->(1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*

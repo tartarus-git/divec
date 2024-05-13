@@ -109,10 +109,9 @@ divec_error_t diveLexProgram_inner(dive_program_t program, dive_build_log_t buil
 					if (entry == nullptr) { return divec_error_t::OUT_OF_MEMORY; }
 
 					const auto [source_code_line, source_code_column] = helpers::get_line_column_from_text_position(program->source_code, token.begin);
-					if (source_code_line == -1) {
+					if (source_code_line == -1 || source_code_column == -1) {
 						// It's probably worthwhile not to touch heap state when bug happens for debugging purposes.
 						// So we're not going to free entry here. Memory leak. The user should terminate the program anyway so it's fine.
-						if (source_code_column != -1) { return divec_error_t::BUG; }
 						return divec_error_t::BUG;
 					}
 

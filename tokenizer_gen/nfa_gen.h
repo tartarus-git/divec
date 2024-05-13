@@ -26,6 +26,7 @@ struct nfa_row_t {
 	nfa_element_t elements[257];
 	std::vector<size_t> children;
 	size_t token_id;
+	size_t priority;
 };
 
 struct nfa_table_t {
